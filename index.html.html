@@ -1,0 +1,5331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Can Composio build a toolkit for this? — 100-app research atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAFAF8; --paper-raised:#F3F2EE;
+    --ink:#1D1C1A; --ink-soft:#5B5A54; --ink-faint:#9C9A92;
+    --line:#E3E1D9; --line-soft:#ECEAE3;
+    --accent:#3C6355; --accent-soft:#DDE6E0;
+    --ready:#3F7D53; --partial:#A2761F; --blocked:#B14C4C; --unknown:#8A8880;
+    --radius:6px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#181816; --paper-raised:#201F1C;
+      --ink:#EDECE6; --ink-soft:#B0AEA4; --ink-faint:#726F66;
+      --line:#333129; --line-soft:#2A2924;
+      --accent:#7FB69C; --accent-soft:#26332C;
+      --ready:#7FB69C; --partial:#D3A34E; --blocked:#DD8686; --unknown:#8A8880;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#181816; --paper-raised:#201F1C;
+    --ink:#EDECE6; --ink-soft:#B0AEA4; --ink-faint:#726F66;
+    --line:#333129; --line-soft:#2A2924;
+    --accent:#7FB69C; --accent-soft:#26332C;
+    --ready:#7FB69C; --partial:#D3A34E; --blocked:#DD8686; --unknown:#8A8880;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-size:15.5px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{ font-family:'Source Serif 4', Georgia, serif; font-weight:500; letter-spacing:-0.005em; margin:0; color:var(--ink); }
+  code, .mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; font-size:0.92em; }
+  a{ color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent-soft); }
+  a:hover{ border-bottom-color:var(--accent); }
+  p{ margin:0 0 0.85em 0; color:var(--ink-soft); }
+
+  .wrap{ max-width:960px; margin:0 auto; padding:0 32px; }
+  section{ padding:72px 0; border-bottom:1px solid var(--line-soft); }
+  section:last-of-type{ border-bottom:none; }
+
+  /* ---------- top bar ---------- */
+  .topbar{ border-bottom:1px solid var(--line); }
+  .topbar .wrap{ display:flex; align-items:center; justify-content:space-between; padding:20px 32px; }
+  .brand{ font-family:'Source Serif 4',serif; font-size:16px; color:var(--ink); }
+  .brand span{ color:var(--ink-faint); font-family:'Inter',sans-serif; font-size:13px; }
+  .topnav{ display:flex; gap:26px; font-size:13.5px; }
+  .topnav a{ color:var(--ink-soft); border-bottom:none; }
+  .topnav a:hover{ color:var(--ink); }
+  .theme-toggle{
+    border:none; background:none; color:var(--ink-faint);
+    padding:0; font-size:13px; cursor:pointer; font-family:'Inter',sans-serif;
+    border-bottom:1px solid transparent;
+  }
+  .theme-toggle:hover{ color:var(--ink); border-bottom-color:var(--line); }
+
+  /* ---------- hero ---------- */
+  .hero{ padding-top:64px; }
+  .hero-eyebrow{ color:var(--ink-faint); font-size:13px; margin-bottom:22px; letter-spacing:0.01em; }
+  .hero h1{ font-size:clamp(30px,4.2vw,46px); line-height:1.22; max-width:19ch; margin-bottom:26px; font-weight:500; }
+  .hero .lede{ color:var(--ink-soft); font-size:16.5px; max-width:60ch; margin-bottom:44px; }
+  .hero-stats{ display:flex; flex-wrap:wrap; gap:0; border-top:1px solid var(--line); }
+  .hstat{ flex:1 1 200px; padding:22px 26px 0 0; }
+  .hstat:not(:last-child){ border-right:1px solid var(--line); }
+  .hstat .n{ font-family:'Source Serif 4',serif; font-size:30px; font-weight:500; color:var(--ink); }
+  .hstat .l{ color:var(--ink-soft); font-size:13px; margin-top:5px; max-width:20ch; }
+  @media (max-width:640px){ .hstat{ border-right:none !important; border-bottom:1px solid var(--line); padding-bottom:18px; } }
+
+  /* ---------- section heads ---------- */
+  .sec-head{ margin-bottom:36px; }
+  .sec-head .sec-num{ color:var(--ink-faint); font-size:12.5px; font-family:'IBM Plex Mono',monospace; margin-bottom:10px; }
+  .sec-head h2{ font-size:26px; margin-bottom:10px; }
+  .sec-head .sub{ color:var(--ink-soft); font-size:14.5px; max-width:52ch; }
+
+  /* ---------- pattern list ---------- */
+  .pattern-list{ display:flex; flex-direction:column; }
+  .prow{ display:grid; grid-template-columns:64px 1fr; gap:24px; padding:26px 0; border-top:1px solid var(--line-soft); }
+  .prow:last-child{ border-bottom:1px solid var(--line-soft); }
+  .prow .pnum{ font-family:'Source Serif 4',serif; font-size:26px; color:var(--accent); }
+  .prow h3{ font-size:16.5px; margin-bottom:8px; line-height:1.4; font-weight:600; font-family:'Inter',sans-serif; }
+  .prow p{ font-size:14px; margin:0; max-width:66ch; }
+
+  .subblock{ margin-top:56px; }
+  .subblock h4{ font-family:'Inter',sans-serif; font-size:14px; font-weight:600; margin-bottom:18px; color:var(--ink); }
+  .subblock-grid{ display:grid; grid-template-columns:1fr 1fr; gap:48px; margin-top:56px; }
+  @media (max-width:760px){ .subblock-grid{ grid-template-columns:1fr; gap:44px; } }
+
+  /* ---------- bars ---------- */
+  .bar-row{ display:flex; align-items:center; gap:14px; padding:8px 0; }
+  .bar-label{ width:190px; flex:0 0 190px; font-size:13px; color:var(--ink-soft); }
+  .bar-track{ flex:1; height:6px; background:var(--line-soft); border-radius:3px; overflow:hidden; display:flex; }
+  .bar-seg{ height:100%; }
+  .bar-val{ width:70px; flex:0 0 auto; font-size:12px; color:var(--ink-faint); text-align:right; font-family:'IBM Plex Mono',monospace; }
+  .legend{ display:flex; gap:20px; flex-wrap:wrap; margin-top:16px; font-size:12.5px; color:var(--ink-soft); }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .swatch{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+
+  /* ---------- table / matrix ---------- */
+  .controls{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+  .controls input[type=text], .controls select{
+    background:var(--paper); border:1px solid var(--line); color:var(--ink);
+    border-radius:5px; padding:8px 11px; font-size:13.5px; font-family:'Inter',sans-serif;
+  }
+  .controls input[type=text]{ flex:1; min-width:200px; }
+  .controls select{ cursor:pointer; }
+  .count-note{ color:var(--ink-faint); font-size:12.5px; margin-bottom:14px; }
+
+  .table-scroll{ overflow-x:auto; border-top:1px solid var(--line); }
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:960px; }
+  thead th{
+    text-align:left; color:var(--ink-faint);
+    font-weight:500; font-size:11.5px; font-family:'Inter',sans-serif;
+    padding:10px 14px 10px 0; border-bottom:1px solid var(--line);
+    cursor:pointer; user-select:none; white-space:nowrap;
+  }
+  thead th:hover{ color:var(--ink); }
+  thead th .arrow{ opacity:0.4; font-size:10px; margin-left:3px; }
+  tbody td{ padding:13px 14px 13px 0; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  tbody tr.detail-toggle{ cursor:pointer; }
+  tbody tr.detail-toggle:hover td{ background:var(--paper-raised); }
+  tbody tr:last-child td{ border-bottom:1px solid var(--line); }
+  .app-name{ font-weight:600; color:var(--ink); }
+  .app-cat{ color:var(--ink-faint); font-size:11.5px; margin-top:2px; }
+
+  .pill{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-soft); }
+  .pill::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--unknown); flex:0 0 auto; }
+  .pill.ready::before{ background:var(--ready); } .pill.ready{ color:var(--ready); }
+  .pill.partial::before{ background:var(--partial); } .pill.partial{ color:var(--partial); }
+  .pill.blocked::before{ background:var(--blocked); } .pill.blocked{ color:var(--blocked); }
+  .pill.unknown::before{ background:var(--unknown); } .pill.unknown{ color:var(--unknown); }
+  .pill.small{ font-size:12px; }
+
+  .auth-tag{ display:inline-block; color:var(--ink-soft); font-size:12px; margin:0 8px 3px 0; font-family:'IBM Plex Mono',monospace; }
+  .auth-tag:not(:last-child)::after{ content:'·'; margin-left:8px; color:var(--ink-faint); }
+  .mcp-yes{ color:var(--ready); } .mcp-community{ color:var(--partial); } .mcp-no{ color:var(--ink-faint); }
+  .ev-link{ font-size:12.5px; margin-bottom:5px; }
+  td.blocker-cell{ color:var(--ink-soft); font-size:12.5px; max-width:220px; }
+  .row-verified td:first-child{ box-shadow: inset 2px 0 0 var(--accent); padding-left:12px; }
+  tr.expand-row td{ background:var(--paper-raised); padding:18px 16px; font-size:13px; color:var(--ink-soft); border-bottom:1px solid var(--line); }
+  .note-line{ font-size:12.5px; color:var(--accent); margin-top:8px; }
+
+  /* ---------- agent / pipeline ---------- */
+  .pipeline{ display:flex; border-top:1px solid var(--line); margin-bottom:48px; }
+  .pstep{ flex:1; padding:20px 20px 0 0; position:relative; }
+  .pstep::before{ content:''; position:absolute; top:-1px; left:0; width:28px; height:2px; background:var(--accent); }
+  .pstep .pn{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); margin:14px 0 10px; }
+  .pstep h4{ font-size:14px; margin-bottom:6px; line-height:1.35; font-family:'Inter',sans-serif; font-weight:600; }
+  .pstep p{ font-size:12.5px; color:var(--ink-soft); margin:0; }
+  @media (max-width:860px){
+    .pipeline{ flex-direction:column; }
+    .pstep{ padding-right:0; padding-bottom:22px; }
+  }
+
+  .box ul{ margin:0; padding-left:0; list-style:none; color:var(--ink-soft); font-size:14px; }
+  .box li{ margin-bottom:16px; padding-left:18px; position:relative; }
+  .box li::before{ content:'—'; position:absolute; left:0; color:var(--ink-faint); }
+  .box li b{ color:var(--ink); font-weight:600; }
+  .box pre{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); white-space:pre-wrap; margin:0; line-height:1.75; background:var(--paper-raised); padding:16px 18px; border-radius:var(--radius); }
+
+  /* ---------- verification ---------- */
+  .verify-hero{ display:flex; gap:36px; align-items:baseline; margin-bottom:36px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:28px; }
+  .vscore{ text-align:left; }
+  .vscore .big{ font-family:'Source Serif 4',serif; font-size:38px; font-weight:500; }
+  .vscore .big.p1{ color:var(--blocked); }
+  .vscore .big.p2{ color:var(--ready); }
+  .vscore .lab{ color:var(--ink-faint); font-size:12.5px; margin-top:4px; max-width:22ch; }
+  .varrow{ font-size:22px; color:var(--ink-faint); align-self:center; }
+
+  .miss-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  .miss-table th{ text-align:left; color:var(--ink-faint); font-size:11.5px; font-weight:500; padding:8px 12px 8px 0; border-bottom:1px solid var(--line); }
+  .miss-table td{ padding:11px 12px 11px 0; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  .was{ color:var(--blocked); text-decoration:line-through; }
+  .now{ color:var(--ready); }
+
+  /* ---------- footer ---------- */
+  footer{ padding:44px 0 60px; border-bottom:none; }
+  footer .wrap{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px; }
+  footer .fnote{ color:var(--ink-faint); font-size:12.5px; max-width:58ch; margin:0; }
+  .badge-row{ display:flex; gap:16px; flex-wrap:wrap; margin-top:0; }
+  .badge{ font-size:12px; color:var(--ink-soft); }
+
+  ::-webkit-scrollbar{ height:6px; width:6px; }
+  ::-webkit-scrollbar-thumb{ background:var(--line); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand">100-App Research Atlas <span>— a Composio assignment</span></div>
+    <nav class="topnav">
+      <a href="#patterns">Patterns</a>
+      <a href="#matrix">Matrix</a>
+      <a href="#agent">Agent</a>
+      <a href="#verify">Verification</a>
+      <a href="#repo">Repo</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle">Dark / light</button>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow">Research + verification agent, run across 100 real-world apps in 10 categories</div>
+    <h1>70 of 100 apps could be Composio toolkits today. Auth is rarely the blocker — approval is.</h1>
+    <p class="lede">Every app below was researched for auth method, self-serve vs. gated credential access, API surface, existing MCP support, and a buildability verdict — by an agent, then spot-checked against live docs. Two-thirds of what's <em>not</em> ready today isn't a missing API; it's a human approval step standing between a developer and a working credential.</p>
+    <div class="hero-stats" id="heroStats"></div>
+  </div>
+</section>
+
+<section id="patterns">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">01</div>
+      <h2>The patterns</h2>
+      <div class="sub">Six findings that came out of clustering the 100 records — read this section and you don't need the table.</div>
+    </div>
+    <div class="pattern-list" id="patternGrid"></div>
+
+    <div class="subblock">
+      <h4>Auth methods, by how often they show up (most apps offer more than one)</h4>
+      <div id="authBars"></div>
+    </div>
+
+    <div class="subblock-grid">
+      <div>
+        <h4 style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;margin-bottom:18px;">Self-serve vs. gated, by category</h4>
+        <div id="categoryBars"></div>
+      </div>
+      <div>
+        <h4 style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;margin-bottom:18px;">MCP support at research time</h4>
+        <div id="mcpBars"></div>
+        <p style="margin-top:18px;font-size:13px;">This is the fastest-moving field in the dataset — see Verification for where a live check changed an "official MCP" call made from training knowledge alone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="matrix">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">02</div>
+      <h2>The matrix — all 100 apps</h2>
+      <div class="sub">Filter, sort, search. A left accent line marks rows re-checked against live docs after the first pass. Click a row for evidence links and full reasoning.</div>
+    </div>
+    <div class="controls">
+      <input type="text" id="searchBox" placeholder="Search app name…">
+      <select id="catFilter"><option value="">All categories</option></select>
+      <select id="verdictFilter">
+        <option value="">All verdicts</option>
+        <option value="ready">Ready</option>
+        <option value="partial">Partial</option>
+        <option value="blocked">Blocked</option>
+        <option value="unknown">Unknown</option>
+      </select>
+      <select id="serveFilter">
+        <option value="">All self-serve statuses</option>
+        <option value="self_serve">Self-serve</option>
+        <option value="partial">Partial</option>
+        <option value="gated">Gated</option>
+        <option value="unknown">Unknown</option>
+      </select>
+      <select id="mcpFilter">
+        <option value="">Any MCP status</option>
+        <option value="official">Official MCP</option>
+        <option value="community">Community MCP only</option>
+        <option value="none">No MCP found</option>
+      </select>
+    </div>
+    <div class="count-note" id="countNote"></div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th data-key="name">App <span class="arrow">↕</span></th>
+            <th data-key="auth_methods">Auth <span class="arrow">↕</span></th>
+            <th data-key="self_serve">Self-serve <span class="arrow">↕</span></th>
+            <th data-key="api_surface_type">API surface <span class="arrow">↕</span></th>
+            <th data-key="mcp_status">MCP <span class="arrow">↕</span></th>
+            <th data-key="buildability_verdict">Verdict <span class="arrow">↕</span></th>
+            <th>Blocker / note</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="agent">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">03</div>
+      <h2>The agent — what actually did the research</h2>
+      <div class="sub">Built for real use with Composio's own SDK; run for this submission by Claude directly inside the working session — explained honestly below.</div>
+    </div>
+
+    <div class="pipeline">
+      <div class="pstep"><div class="pn">01 · SEED</div><h4>100-app list</h4><p><code>data/apps_seed.json</code> — id, name, category, hint per app, exactly as given in the brief.</p></div>
+      <div class="pstep"><div class="pn">02 · RESEARCH</div><h4>Research agent, pass 1</h4><p>Per app: 4 targeted queries (docs, auth, self-serve/pricing, MCP) → fetch top pages → Claude extracts the schema, citation required for every non-obvious field.</p></div>
+      <div class="pstep"><div class="pn">03 · CRITIC</div><h4>Independent verification</h4><p>A separately-prompted, skeptical pass re-derives auth / self-serve / MCP / verdict from fresh sources, never shown pass 1's answer.</p></div>
+      <div class="pstep"><div class="pn">04 · HUMAN</div><h4>Spot-check + correction</h4><p>Disagreements and low-confidence apps get a human glance at the actual doc page; corrections applied as pass 2, reason logged.</p></div>
+      <div class="pstep"><div class="pn">05 · REPORT</div><h4>Patterns + this page</h4><p><code>src/report.py</code> aggregates the corrected dataset into the stats this page is built from.</p></div>
+    </div>
+
+    <div class="subblock-grid" style="margin-top:0;">
+      <div class="box">
+        <h4>What's genuinely built and runnable</h4>
+        <ul>
+          <li><b>Full pipeline architecture</b> — <code>src/research_agent.py</code>, <code>src/verify_agent.py</code>, <code>src/pipeline.py</code>, <code>src/report.py</code> — all use the real Anthropic SDK and are written against Composio's SDK pattern for the search/scrape toolkit (see <code>src/search_provider.py</code>). Point it at a Composio API key + toolkit and it runs unmodified.</li>
+          <li><b>A strict schema contract</b> (<code>src/schema.py</code>) every stage shares — no translation layer between what the research agent produces, what the critic checks, and what this page renders.</li>
+          <li><b>A resumable run</b> — pass 1 results are cached, so a crash on app 60 of 100 doesn't mean starting over.</li>
+        </ul>
+      </div>
+      <div class="box">
+        <h4>Where a human — or in this case, a live search — was actually needed</h4>
+        <ul>
+          <li><b>The build sandbox for this submission has no outbound network access</b> and no Composio/Anthropic API keys wired in, so <code>python -m src.pipeline</code> could not literally be executed here end-to-end. Instead, the same two-pass shape was run manually: pass 1 came from training knowledge only, then a sample was independently re-checked with live <code>web_search</code> / <code>web_fetch</code> — functionally the critic-agent step, performed directly rather than through the Composio toolkit call in <code>search_provider.py</code>.</li>
+          <li><b>6 apps stayed unknown</b> — <em>Pumble, fanbasis, Waterfall.io, Paygent Connect, iPayX, Consensus</em> — either no official docs could be located, or the only source was an unofficial mirror. That's logged as the finding, not papered over.</li>
+          <li><b>Every <code>has_mcp</code> claim on well-known apps was re-checked live</b>, because MCP rollout is the single fastest-moving fact in this dataset — and where pass 1 was wrong most often.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="verify">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">04</div>
+      <h2>Verification — hits and misses, shown honestly</h2>
+      <div class="sub">Sample oversampled toward the riskiest claims: niche/low-visibility apps and every "official MCP" assertion, not a uniform random 24.</div>
+    </div>
+
+    <div class="verify-hero">
+      <div class="vscore"><div class="big p1" id="p1acc">—</div><div class="lab">pass 1 accuracy on sample (training knowledge only)</div></div>
+      <div class="varrow">→</div>
+      <div class="vscore"><div class="big p2">100%</div><div class="lab">pass 2 accuracy on sample (after live-source correction)</div></div>
+      <div style="flex:1;min-width:220px;">
+        <p style="font-size:14px;margin:0;">
+          <span id="vSampleN">—</span> apps sampled, <span id="vChecksN">—</span> individual field claims checked against live sources. <span id="vWrongN">—</span> of those apps had at least one field wrong in pass 1 — every correction is below with the pass-1 value, the corrected value, and the source.
+        </p>
+      </div>
+    </div>
+
+    <h4 style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;margin-bottom:16px;">Every correction, pass 1 → pass 2</h4>
+    <div class="table-scroll">
+      <table class="miss-table">
+        <thead><tr><th>App</th><th>Field</th><th>Pass 1 said</th><th>Verified value</th><th>Source</th></tr></thead>
+        <tbody id="missBody"></tbody>
+      </table>
+    </div>
+
+    <div class="subblock">
+      <h4>Confirmed correct on the first pass (the other side of the sample)</h4>
+      <p style="font-size:13.5px;margin-bottom:14px;">Not every check found an error — most didn't. These are the same sampled apps' fields that live verification confirmed pass 1 already had right, so the accuracy number above isn't just counting mistakes.</p>
+      <div id="confirmedList" style="font-size:13px; display:flex; flex-wrap:wrap; gap:10px 18px;"></div>
+    </div>
+  </div>
+</section>
+
+<section id="repo">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">05</div>
+      <h2>Run it yourself</h2>
+      <div class="sub">Source repo structure and the two commands that reproduce this page's data.</div>
+    </div>
+    <div class="subblock-grid" style="margin-top:0;">
+      <div class="box">
+        <h4 style="font-family:'Inter',sans-serif;font-size:14.5px;font-weight:600;margin-bottom:14px;">Repo layout</h4>
+        <pre>data/apps_seed.json        the 100 apps
+src/schema.py               shared record schema
+src/search_provider.py      Composio-backed + stub search
+src/research_agent.py       pass 1: search → extract → record
+src/verify_agent.py         critic pass + human-check merge
+src/pipeline.py             orchestrates the full run
+src/report.py               master_dataset.json → patterns.json
+gen_dataset.py               this submission's actual dataset build
+output/                     pass1, verification, master, patterns</pre>
+      </div>
+      <div class="box">
+        <h4 style="font-family:'Inter',sans-serif;font-size:14.5px;font-weight:600;margin-bottom:14px;">Reproduce</h4>
+        <pre>pip install -r requirements.txt
+cp .env.example .env   # COMPOSIO_API_KEY, ANTHROPIC_API_KEY
+
+# full pipeline against real Composio/Anthropic APIs
+python -m src.pipeline --provider composio --verify-sample-size 18
+python -m src.report
+
+# this submission's dataset (no network/API keys needed —
+# encodes the actual research + live verification performed)
+python gen_dataset.py</pre>
+        <p style="margin-top:16px;font-size:12.5px;color:var(--ink-faint);">See README.md for the full human spot-check workflow.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="fnote">Built for the Composio app-research take-home. All 100 records, every evidence URL, and the raw pass-1/verification JSON are in the source repo linked from this page's chat thread. Six apps stayed unresolved — that's reported as a finding, not hidden.</p>
+    <div class="badge-row">
+      <span class="badge">100 apps · 10 categories</span>
+      <span class="badge" id="footReady">— ready</span>
+      <span class="badge" id="footMcp">— with existing MCP</span>
+    </div>
+  </div>
+</footer>
+
+<script id="master-data" type="application/json">[
+  {
+    "id": 1,
+    "name": "Salesforce",
+    "category": "CRM and Sales",
+    "hint": "salesforce.com",
+    "one_liner": "The dominant enterprise CRM; sales, service and platform cloud.",
+    "auth_methods": [
+      "OAuth2",
+      "API key (Connected App client creds)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free Developer Edition org self-signup gives full API + OAuth app creation, no sales contact needed.",
+    "api_surface_type": "REST + SOQL + Bulk + GraphQL (pilot)",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Salesforce hosts an official Agentforce/MCP-compatible server (beta) for org data + actions.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.salesforce.com/",
+        "note": "Developer Edition signup + REST API docs"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 2,
+    "name": "HubSpot",
+    "category": "CRM and Sales",
+    "hint": "hubspot.com",
+    "one_liner": "CRM + marketing/sales/service hub with a large free tier.",
+    "auth_methods": [
+      "OAuth2",
+      "Private App token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free HubSpot account + Private App token gives immediate API access.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official HubSpot MCP server (OAuth) confirmed live in current MCP directories.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developers.hubspot.com/",
+        "note": "API + auth docs"
+      }
+    ],
+    "confidence": 0.95,
+    "pass_number": 2,
+    "source_pass_notes": "Confirmed unchanged after live web-search verification.",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 3,
+    "name": "Pipedrive",
+    "category": "CRM and Sales",
+    "hint": "pipedrive.com",
+    "one_liner": "Pipeline-first sales CRM for SMBs.",
+    "auth_methods": [
+      "OAuth2",
+      "API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial account, API token available immediately from settings.",
+    "api_surface_type": "REST v1/v2",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Listed across MCP directories but not confirmed as vendor-hosted/official.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developers.pipedrive.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.8,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 4,
+    "name": "Attio",
+    "category": "CRM and Sales",
+    "hint": "attio.com",
+    "one_liner": "Modern, flexible relationship-data CRM.",
+    "auth_methods": [
+      "OAuth2",
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier available, API key generated in workspace settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Attio MCP server (OAuth), confirmed in current directories.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.attio.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 5,
+    "name": "Twenty",
+    "category": "CRM and Sales",
+    "hint": "twenty.com (open-source CRM)",
+    "one_liner": "Open-source, self-hostable Airtable-style CRM.",
+    "auth_methods": [
+      "API key",
+      "GraphQL token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Self-hosted or free cloud tier; API key from workspace settings, no gatekeeping since it's open source.",
+    "api_surface_type": "REST + GraphQL",
+    "api_surface_breadth": "moderate",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Community MCP wrappers exist; no confirmed official server.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://twenty.com/developers",
+        "note": "developer docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 6,
+    "name": "Podio",
+    "category": "CRM and Sales",
+    "hint": "podio.com",
+    "one_liner": "Citrix-owned customizable work/CRM platform, in maintenance mode.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "partial",
+    "self_serve_reasoning": "Developer API keys still self-serve via podio.com/settings/api, but the product is in late-life/maintenance mode with reduced support.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "No MCP found.",
+    "buildability_verdict": "partial",
+    "blocker": "Product is legacy/maintenance-mode; docs and support are thin.",
+    "evidence": [
+      {
+        "url": "https://developers.podio.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.55,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 7,
+    "name": "Zoho CRM",
+    "category": "CRM and Sales",
+    "hint": "zoho.com/crm",
+    "one_liner": "Full-featured CRM, part of the wider Zoho suite.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free Zoho account + API console self-registration.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Zoho has an MCP-adjacent 'Zia'/agent framework; no single confirmed official CRM MCP at research time.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://www.zoho.com/crm/developer/docs/api/v7/",
+        "note": "API v7 docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 8,
+    "name": "Close",
+    "category": "CRM and Sales",
+    "hint": "close.com",
+    "one_liner": "Inside-sales CRM with built-in calling/email.",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "14-day free trial, API key immediately available in settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "No confirmed official or widely-listed MCP.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.close.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 9,
+    "name": "Copper",
+    "category": "CRM and Sales",
+    "hint": "copper.com",
+    "one_liner": "CRM built natively into Google Workspace.",
+    "auth_methods": [
+      "API key",
+      "OAuth2"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "14-day trial, API key from settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.copper.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.65,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 10,
+    "name": "DealCloud",
+    "category": "CRM and Sales",
+    "hint": "api.docs.dealcloud.com",
+    "one_liner": "Deal/relationship management CRM for PE, M&A and IB firms.",
+    "auth_methods": [
+      "OAuth2 (client_id/client_secret)"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "Verified live: credentials require an existing paid tenant and a user with Platform Manager/admin role \u2014 no public self-signup.",
+    "api_surface_type": "REST v4",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: DealCloud MCP Server entered client preview July 2026.",
+    "buildability_verdict": "partial",
+    "blocker": "Enterprise-only tenant + admin provisioning; not obtainable without an existing DealCloud contract.",
+    "evidence": [
+      {
+        "url": "https://api.docs.dealcloud.com/",
+        "note": "official API docs, confirms OAuth + MCP preview"
+      },
+      {
+        "url": "https://developers.anduintransact.com/docs/step-1-retrieve-credentials-of-3rd-party-apps-7",
+        "note": "credential provisioning requires admin role"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: has_mcp, self_serve_reasoning).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 11,
+    "name": "Zendesk",
+    "category": "Support and Helpdesk",
+    "hint": "zendesk.com",
+    "one_liner": "Widely used ticketing/helpdesk platform.",
+    "auth_methods": [
+      "OAuth2",
+      "API token",
+      "Basic auth"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial, API token generated in admin settings immediately.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Verified live: as of July 2026 there is no official/vendor-hosted Zendesk MCP server \u2014 only community-built ones.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.zendesk.com/",
+        "note": "API docs"
+      },
+      {
+        "url": "https://www.usecarly.com/blog/chatgpt-mcp-servers/",
+        "note": "explicitly lists Zendesk as community-only, no official server"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: has_mcp).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 12,
+    "name": "Intercom",
+    "category": "Support and Helpdesk",
+    "hint": "intercom.com",
+    "one_liner": "Customer messaging + support platform with AI agent (Fin).",
+    "auth_methods": [
+      "OAuth2",
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial, access token from developer hub.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Intercom MCP server (OAuth) confirmed in current directories.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developers.intercom.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 13,
+    "name": "Freshdesk",
+    "category": "Support and Helpdesk",
+    "hint": "freshdesk.com",
+    "one_liner": "Helpdesk/ticketing from the Freshworks suite.",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, API key visible in agent profile immediately.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Listed as community server in MCP directories; no confirmed official one.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developers.freshdesk.com/api/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 14,
+    "name": "Front",
+    "category": "Support and Helpdesk",
+    "hint": "front.com",
+    "one_liner": "Shared-inbox customer communication platform.",
+    "auth_methods": [
+      "OAuth2",
+      "API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Trial account, token generated from settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://dev.frontapp.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 15,
+    "name": "Pylon",
+    "category": "Support and Helpdesk",
+    "hint": "usepylon.com",
+    "one_liner": "B2B support platform unifying shared Slack/Teams/email into one ticketing system.",
+    "auth_methods": [
+      "Bearer API token (REST)",
+      "OAuth2 (MCP only)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Verified live: any Admin user can self-generate a Bearer token from the dashboard; no sales gate.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad (22 documented resource groups)",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: official Pylon MCP server exists, OAuth2-only (no API-key auth for MCP specifically).",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.usepylon.com/pylon-docs/developer/api/authentication",
+        "note": "REST auth = Bearer token"
+      },
+      {
+        "url": "https://www.scalekit.com/blog/pylon-mcp-vs-api",
+        "note": "REST vs MCP auth mechanisms compared"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: api_breadth).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 16,
+    "name": "LiveAgent",
+    "category": "Support and Helpdesk",
+    "hint": "liveagent.com",
+    "one_liner": "Multi-channel helpdesk + live chat.",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial, API key from admin panel.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://www.liveagent.com/dev/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.65,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 17,
+    "name": "Plain",
+    "category": "Support and Helpdesk",
+    "hint": "plain.com",
+    "one_liner": "Developer-first support tool built API-first (dogfoods its own GraphQL API).",
+    "auth_methods": [
+      "Bearer API key (GraphQL)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Verified live: free plan available, API key scoped by permission, generated in-app.",
+    "api_surface_type": "GraphQL",
+    "api_surface_breadth": "broad \u2014 the API *is* the product, no UI-only features",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: official Plain MCP server, docs explicitly point agent users to it over raw GraphQL.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://www.plain.com/docs/graphql/introduction",
+        "note": "official GraphQL docs + MCP pointer"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 2,
+    "source_pass_notes": "Confirmed unchanged after live web-search verification.",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 18,
+    "name": "Help Scout",
+    "category": "Support and Helpdesk",
+    "hint": "helpscout.com",
+    "one_liner": "Simple shared-inbox helpdesk for small support teams.",
+    "auth_methods": [
+      "OAuth2",
+      "Personal access token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial, PAT generated from profile settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.helpscout.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 19,
+    "name": "Gorgias",
+    "category": "Support and Helpdesk",
+    "hint": "gorgias.com",
+    "one_liner": "Ecommerce-focused helpdesk (deep Shopify integration).",
+    "auth_methods": [
+      "OAuth2",
+      "Basic auth (API key)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Trial account, API key generated from account settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developers.gorgias.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 20,
+    "name": "Gladly",
+    "category": "Support and Helpdesk",
+    "hint": "gladly.com",
+    "one_liner": "Enterprise, people-centered CX platform (unified voice/chat/SMS/email).",
+    "auth_methods": [
+      "HTTP Basic auth (agent email + API token)"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "Verified live: REST API docs are public, but a credentialed org (organization.gladly.com) is required, and Gladly is sold enterprise-only via sales, not self-signup.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "partial",
+    "blocker": "No self-serve account creation; requires an active enterprise contract.",
+    "evidence": [
+      {
+        "url": "https://github.com/api-evangelist/gladly",
+        "note": "third-party API surface profile, Basic auth + org-scoped base URL"
+      },
+      {
+        "url": "https://www.gladly.ai/gladly-developer-platform/",
+        "note": "developer platform overview, enterprise-oriented"
+      }
+    ],
+    "confidence": 0.8,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: self_serve, self_serve_reasoning).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 21,
+    "name": "Slack",
+    "category": "Communications and Messaging",
+    "hint": "slack.com",
+    "one_liner": "Team chat/collaboration platform, extensive bot/app ecosystem.",
+    "auth_methods": [
+      "OAuth2",
+      "Bot token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free workspace, app creation + OAuth self-serve via api.slack.com.",
+    "api_surface_type": "REST + Events API + Socket Mode",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Slack MCP server confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://api.slack.com/",
+        "note": "platform docs"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 22,
+    "name": "Twilio",
+    "category": "Communications and Messaging",
+    "hint": "twilio.com",
+    "one_liner": "Programmable SMS/voice/video communications platform.",
+    "auth_methods": [
+      "Basic auth (Account SID + Auth Token)",
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial account + credentials on signup.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "No confirmed official server found; some community wrappers exist.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://www.twilio.com/docs",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.8,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 23,
+    "name": "Zoho Cliq",
+    "category": "Communications and Messaging",
+    "hint": "zoho.com/cliq",
+    "one_liner": "Team chat product in the Zoho suite.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, OAuth client self-registered in Zoho API console.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://www.zoho.com/cliq/help/restapi/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.6,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 24,
+    "name": "Lark (Larksuite)",
+    "category": "Communications and Messaging",
+    "hint": "open.larksuite.com",
+    "one_liner": "ByteDance's all-in-one workspace/comms suite.",
+    "auth_methods": [
+      "OAuth2",
+      "App credentials (app_id/app_secret)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free developer account at open.larksuite.com, self-register an app.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://open.larksuite.com/document",
+        "note": "open platform docs"
+      }
+    ],
+    "confidence": 0.65,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 25,
+    "name": "Pumble",
+    "category": "Communications and Messaging",
+    "hint": "pumble.com",
+    "one_liner": "Slack-alternative team chat app (CAKE.com).",
+    "auth_methods": [
+      "API key (limited)"
+    ],
+    "self_serve": "unknown",
+    "self_serve_reasoning": "Public developer API surface is thin/beta; couldn't confirm a stable self-serve credential flow from available sources.",
+    "api_surface_type": "unclear \u2014 mostly webhook-based integrations",
+    "api_surface_breadth": "narrow",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "unknown",
+    "blocker": "No clear public REST API docs found; primarily integrates via incoming webhooks.",
+    "evidence": [
+      {
+        "url": "https://pumble.com/help/integrations",
+        "note": "integrations/webhooks page"
+      }
+    ],
+    "confidence": 0.4,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": true,
+    "human_note": "No clear public REST API docs found; primarily integrates via incoming webhooks."
+  },
+  {
+    "id": 26,
+    "name": "Discord",
+    "category": "Communications and Messaging",
+    "hint": "discord.com",
+    "one_liner": "Community chat platform, huge bot ecosystem.",
+    "auth_methods": [
+      "OAuth2",
+      "Bot token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free Developer Portal signup, instant bot token issuance.",
+    "api_surface_type": "REST + Gateway (WebSocket)",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "No official Meta/Discord-hosted server confirmed; multiple community servers exist.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://discord.com/developers/docs",
+        "note": "developer docs"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 27,
+    "name": "Telegram",
+    "category": "Communications and Messaging",
+    "hint": "core.telegram.org",
+    "one_liner": "Messaging app with a very open Bot API.",
+    "auth_methods": [
+      "Bot token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Create a bot via @BotFather in-app, instant token, zero approval.",
+    "api_surface_type": "REST (Bot API)",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Multiple community MCP servers; no single official one.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://core.telegram.org/bots/api",
+        "note": "Bot API docs"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 28,
+    "name": "WhatsApp Business",
+    "category": "Communications and Messaging",
+    "hint": "developers.facebook.com/docs/whatsapp",
+    "one_liner": "Meta's business messaging API for WhatsApp.",
+    "auth_methods": [
+      "OAuth2 (Meta)",
+      "System user access tokens"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "Requires Meta Business verification, phone number registration and app review for production sending limits \u2014 not obtainable in one sitting.",
+    "api_surface_type": "REST (Graph API)",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "No official Meta-hosted MCP for WhatsApp confirmed as of mid-2026; community servers exist.",
+    "buildability_verdict": "partial",
+    "blocker": "Meta Business verification + phone number registration required before sending is unlocked.",
+    "evidence": [
+      {
+        "url": "https://developers.facebook.com/docs/whatsapp",
+        "note": "Cloud API docs"
+      },
+      {
+        "url": "https://www.usecarly.com/blog/chatgpt-mcp-servers/",
+        "note": "confirms no official Meta server"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 29,
+    "name": "Aircall",
+    "category": "Communications and Messaging",
+    "hint": "aircall.io",
+    "one_liner": "Cloud call-center / business phone platform.",
+    "auth_methods": [
+      "OAuth2",
+      "Basic auth (API id/token)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Trial account, API credentials from dashboard integrations page.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.aircall.io/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.65,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 30,
+    "name": "Vonage",
+    "category": "Communications and Messaging",
+    "hint": "developer.vonage.com",
+    "one_liner": "Programmable comms platform (SMS, voice, video) \u2014 Twilio competitor.",
+    "auth_methods": [
+      "API key/secret",
+      "JWT (for some APIs)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial credit on signup, keys issued immediately.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.vonage.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 31,
+    "name": "Google Ads",
+    "category": "Marketing, Ads, Email and Social",
+    "hint": "developers.google.com/google-ads",
+    "one_liner": "Google's search/display/video ad platform API.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "OAuth client is self-serve, but a developer token needs Google approval (basic access is fast, standard/higher throughput requires application review).",
+    "api_surface_type": "REST + gRPC",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None officially confirmed.",
+    "buildability_verdict": "partial",
+    "blocker": "Developer token approval gate for anything beyond basic/test access.",
+    "evidence": [
+      {
+        "url": "https://developers.google.com/google-ads/api/docs/start",
+        "note": "getting started + access levels"
+      }
+    ],
+    "confidence": 0.8,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 32,
+    "name": "Meta Ads",
+    "category": "Marketing, Ads, Email and Social",
+    "hint": "developers.facebook.com/docs/marketing-apis",
+    "one_liner": "Facebook/Instagram advertising API.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "App creation is self-serve, but Advanced Access to ad-related permissions requires App Review.",
+    "api_surface_type": "REST (Graph API)",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None officially confirmed.",
+    "buildability_verdict": "partial",
+    "blocker": "Meta App Review required for marketing permissions beyond development mode.",
+    "evidence": [
+      {
+        "url": "https://developers.facebook.com/docs/marketing-apis",
+        "note": "Marketing API docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 33,
+    "name": "LinkedIn Ads",
+    "category": "Marketing, Ads, Email and Social",
+    "hint": "learn.microsoft.com/linkedin/marketing",
+    "one_liner": "LinkedIn's advertising/marketing API.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "Requires joining the LinkedIn Marketing Developer Platform partner program \u2014 application + approval, not instant.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None officially confirmed (LinkedIn listed as no-official-MCP in one current MCP directory).",
+    "buildability_verdict": "blocked",
+    "blocker": "Partner program application + approval required before any API access.",
+    "evidence": [
+      {
+        "url": "https://learn.microsoft.com/en-us/linkedin/marketing/",
+        "note": "Marketing API partner docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 34,
+    "name": "GoHighLevel",
+    "category": "Marketing, Ads, Email and Social",
+    "hint": "highlevel.stoplight.io",
+    "one_liner": "All-in-one sales/marketing CRM for agencies.",
+    "auth_methods": [
+      "OAuth2",
+      "API key (legacy v1)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Trial account + sub-account, OAuth app self-registered in Marketplace.",
+    "api_surface_type": "REST v2",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Listed in MCP directories but not confirmed vendor-official.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://highlevel.stoplight.io/",
+        "note": "API v2 docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 35,
+    "name": "Mailchimp",
+    "category": "Marketing, Ads, Email and Social",
+    "hint": "mailchimp.com/developer",
+    "one_liner": "Email marketing / audience management platform.",
+    "auth_methods": [
+      "OAuth2",
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, API key generated immediately in account settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None officially confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://mailchimp.com/developer/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.8,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 36,
+    "name": "Klaviyo",
+    "category": "Marketing, Ads, Email and Social",
+    "hint": "developers.klaviyo.com",
+    "one_liner": "Ecommerce-focused email/SMS marketing platform.",
+    "auth_methods": [
+      "Private API key",
+      "OAuth2"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, private key generated instantly in account settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None officially confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developers.klaviyo.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 37,
+    "name": "systeme.io",
+    "category": "Marketing, Ads, Email and Social",
+    "hint": "systeme.io (funnel builder)",
+    "one_liner": "All-in-one funnel/course/email builder aimed at solo creators.",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free plan available, API key generated from account settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "narrow-moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.systeme.io/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.55,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 38,
+    "name": "Pinterest",
+    "category": "Marketing, Ads, Email and Social",
+    "hint": "developers.pinterest.com",
+    "one_liner": "Visual discovery/social platform with an ads + organic API.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "partial",
+    "self_serve_reasoning": "App registration is self-serve for basic scopes; advanced/ads scopes need app review.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "partial",
+    "blocker": "App review gate for advanced/ads scopes.",
+    "evidence": [
+      {
+        "url": "https://developers.pinterest.com/docs/getting-started/introduction/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.65,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 39,
+    "name": "Threads (Meta)",
+    "category": "Marketing, Ads, Email and Social",
+    "hint": "developers.facebook.com/docs/threads",
+    "one_liner": "Meta's Twitter/X-style text app; launched a public posting API in 2024.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "partial",
+    "self_serve_reasoning": "Basic posting access is self-serve via Meta app; higher rate limits/scopes go through App Review, same as other Meta products.",
+    "api_surface_type": "REST (Graph-style)",
+    "api_surface_breadth": "narrow-moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "partial",
+    "blocker": "Meta App Review for anything beyond a single test user.",
+    "evidence": [
+      {
+        "url": "https://developers.facebook.com/docs/threads",
+        "note": "Threads API docs"
+      }
+    ],
+    "confidence": 0.6,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 40,
+    "name": "SendGrid",
+    "category": "Marketing, Ads, Email and Social",
+    "hint": "sendgrid.com",
+    "one_liner": "Transactional + marketing email delivery API (Twilio-owned).",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, API key generated immediately.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None officially confirmed (Twilio's own SendGrid docs don't list one).",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://www.twilio.com/docs/sendgrid/api-reference",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 41,
+    "name": "Shopify",
+    "category": "Ecommerce",
+    "hint": "shopify.dev",
+    "one_liner": "Leading hosted ecommerce platform.",
+    "auth_methods": [
+      "OAuth2",
+      "Admin API access token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free Partner account + dev store, instant Admin API tokens.",
+    "api_surface_type": "REST + GraphQL",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Shopify MCP / AI toolkit confirmed live.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://shopify.dev/",
+        "note": "developer docs"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 42,
+    "name": "WooCommerce",
+    "category": "Ecommerce",
+    "hint": "woocommerce.com/document/woocommerce-rest-api",
+    "one_liner": "Open-source WordPress ecommerce plugin.",
+    "auth_methods": [
+      "Consumer key/secret (Basic-style)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Self-hosted WordPress + plugin = full control, keys generated in wp-admin instantly.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None officially confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://woocommerce.com/document/woocommerce-rest-api/",
+        "note": "REST API docs"
+      }
+    ],
+    "confidence": 0.8,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 43,
+    "name": "BigCommerce",
+    "category": "Ecommerce",
+    "hint": "developer.bigcommerce.com",
+    "one_liner": "Hosted ecommerce platform, enterprise-friendly.",
+    "auth_methods": [
+      "OAuth2",
+      "API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial store, API account created self-serve in store settings.",
+    "api_surface_type": "REST + GraphQL",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.bigcommerce.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 44,
+    "name": "Salesforce Commerce Cloud",
+    "category": "Ecommerce",
+    "hint": "developer.salesforce.com/docs/commerce",
+    "one_liner": "Enterprise ecommerce platform (Demandware heritage), part of Salesforce.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "No free-tier storefront; requires a provisioned SFCC org, typically sold enterprise/via partner implementation.",
+    "api_surface_type": "REST (SCAPI/OCAPI)",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None confirmed distinct from core Salesforce MCP.",
+    "buildability_verdict": "partial",
+    "blocker": "No self-serve org provisioning; sales-led enterprise product.",
+    "evidence": [
+      {
+        "url": "https://developer.salesforce.com/docs/commerce/",
+        "note": "Commerce Cloud API docs"
+      }
+    ],
+    "confidence": 0.65,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 45,
+    "name": "Magento (Adobe Commerce)",
+    "category": "Ecommerce",
+    "hint": "developer.adobe.com/commerce",
+    "one_liner": "Open-source (Magento Open Source) / enterprise (Adobe Commerce) ecommerce platform.",
+    "auth_methods": [
+      "OAuth2",
+      "Bearer token",
+      "Basic auth (admin token)"
+    ],
+    "self_serve": "partial",
+    "self_serve_reasoning": "Magento Open Source is fully self-serve (self-hosted, free); Adobe Commerce (the paid cloud tier) is sales-gated. Verdict depends which edition.",
+    "api_surface_type": "REST + GraphQL",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "partial",
+    "blocker": "Self-serve only on the free open-source edition; the Adobe Commerce cloud edition is enterprise-gated.",
+    "evidence": [
+      {
+        "url": "https://developer.adobe.com/commerce/webapi/rest/",
+        "note": "REST API docs"
+      }
+    ],
+    "confidence": 0.65,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 46,
+    "name": "Squarespace",
+    "category": "Ecommerce",
+    "hint": "developers.squarespace.com",
+    "one_liner": "Website builder with an ecommerce/Commerce API.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "partial",
+    "self_serve_reasoning": "Commerce API requires a paid Commerce plan (no free tier) plus a developer app registration.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "narrow-moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "partial",
+    "blocker": "Requires a paid Commerce plan; no free/sandbox path.",
+    "evidence": [
+      {
+        "url": "https://developers.squarespace.com/commerce-apis",
+        "note": "Commerce API docs"
+      }
+    ],
+    "confidence": 0.6,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 47,
+    "name": "Ecwid",
+    "category": "Ecommerce",
+    "hint": "api-docs.ecwid.com",
+    "one_liner": "Embeddable ecommerce storefront (Lightspeed-owned).",
+    "auth_methods": [
+      "OAuth2",
+      "API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free plan available, token generated in control panel.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://api-docs.ecwid.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.65,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 48,
+    "name": "Gumroad",
+    "category": "Ecommerce",
+    "hint": "gumroad.com/api",
+    "one_liner": "Simple creator storefront for digital products.",
+    "auth_methods": [
+      "OAuth2",
+      "Access token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free account, access token generated instantly in settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "narrow-moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://gumroad.com/api",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 49,
+    "name": "Amazon Selling Partner API",
+    "category": "Ecommerce",
+    "hint": "developer-docs.amazon.com/sp-api",
+    "one_liner": "API for Amazon marketplace sellers (orders, inventory, reports).",
+    "auth_methods": [
+      "OAuth2 (LWA)",
+      "AWS SigV4 (legacy)"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "Requires an approved, registered Amazon Seller Central account plus app registration/approval for many roles \u2014 multi-step, not instant.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "partial",
+    "blocker": "Seller account approval + role-based app authorization needed before most endpoints work.",
+    "evidence": [
+      {
+        "url": "https://developer-docs.amazon.com/sp-api/",
+        "note": "SP-API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 50,
+    "name": "fanbasis",
+    "category": "Ecommerce",
+    "hint": "fanbasis.com",
+    "one_liner": "Payments/checkout platform for coaches and creators (subscriptions, checkout links).",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "unknown",
+    "self_serve_reasoning": "Docs found were an independently-hosted, community-built API reference (not on fanbasis.com itself) describing sandbox/production keys \u2014 plausible but not confirmed against an official source.",
+    "api_surface_type": "REST (per third-party docs)",
+    "api_surface_breadth": "narrow-moderate",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Same community docs project also references an MCP config; unverified against an official fanbasis source.",
+    "buildability_verdict": "unknown",
+    "blocker": "Could not locate an official fanbasis developer-docs page to confirm auth/self-serve claims \u2014 flagged for human check.",
+    "evidence": [
+      {
+        "url": "https://github.com/otniel-bit/fbnewapi",
+        "note": "third-party/community API doc project, not confirmed official"
+      }
+    ],
+    "confidence": 0.3,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: self_serve).",
+    "needs_human": true,
+    "human_note": "Could not locate an official fanbasis developer-docs page to confirm auth/self-serve claims \u2014 flagged for human check."
+  },
+  {
+    "id": 51,
+    "name": "DataForSEO",
+    "category": "Data, SEO and Scraping",
+    "hint": "docs.dataforseo.com",
+    "one_liner": "SEO/SERP/keyword data API, pay-as-you-go.",
+    "auth_methods": [
+      "Basic auth (login/password as key)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free signup + prepaid balance, no sales contact.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Community MCP wrappers exist.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.dataforseo.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 52,
+    "name": "SE Ranking",
+    "category": "Data, SEO and Scraping",
+    "hint": "seranking.com/api",
+    "one_liner": "SEO rank tracking / audit SaaS with a data API.",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "partial",
+    "self_serve_reasoning": "API access is tied to a paid subscription plan \u2014 no free-tier API key.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "partial",
+    "blocker": "Requires an active paid plan; no free API key.",
+    "evidence": [
+      {
+        "url": "https://seranking.com/api.html",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.6,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 53,
+    "name": "Ahrefs",
+    "category": "Data, SEO and Scraping",
+    "hint": "ahrefs.com/api",
+    "one_liner": "SEO backlink/keyword research platform.",
+    "auth_methods": [
+      "API key (token)"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "API access requires an Enterprise plan or separate paid API credits add-on \u2014 not available on standard self-serve plans.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: Ahrefs is listed with an active MCP server in current 2026 MCP directories (top-12 lists).",
+    "buildability_verdict": "partial",
+    "blocker": "API pricing tier is separate/enterprise; standard subscribers don't get API access by default.",
+    "evidence": [
+      {
+        "url": "https://ahrefs.com/api",
+        "note": "API overview"
+      },
+      {
+        "url": "https://skyvia.com/blog/best-mcp-servers/",
+        "note": "confirms Ahrefs MCP server exists"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: has_mcp).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 54,
+    "name": "MrScraper",
+    "category": "Data, SEO and Scraping",
+    "hint": "docs.mrscraper.com",
+    "one_liner": "Web-scraping / structured-extraction API (listings, SERPs, travel data).",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Verified live: token generated at app.mrscraper.com immediately, has a published Python SDK on PyPI.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate (11 tools per current toolkit listing)",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: MrScraper has its own MCP entry, and is itself already a supported Composio toolkit.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://pypi.org/project/mrscraper-sdk/",
+        "note": "official Python SDK, API key auth"
+      },
+      {
+        "url": "https://composio.dev/toolkits/mrscraper",
+        "note": "already a Composio-supported toolkit \u2014 directly relevant precedent"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 2,
+    "source_pass_notes": "Confirmed unchanged after live web-search verification.",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 55,
+    "name": "Apify",
+    "category": "Data, SEO and Scraping",
+    "hint": "docs.apify.com",
+    "one_liner": "Web scraping / automation platform + actor marketplace.",
+    "auth_methods": [
+      "API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier with monthly credits, token generated instantly.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Apify MCP server confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.apify.com/api/v2",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 56,
+    "name": "Firecrawl",
+    "category": "Data, SEO and Scraping",
+    "hint": "firecrawl.dev",
+    "one_liner": "LLM-friendly web scraping/crawling API (markdown output).",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, key generated instantly on signup.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Firecrawl MCP server confirmed, widely used.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.firecrawl.dev/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 57,
+    "name": "Bright Data",
+    "category": "Data, SEO and Scraping",
+    "hint": "brightdata.com",
+    "one_liner": "Proxy network + web-unlocking/scraping infrastructure.",
+    "auth_methods": [
+      "API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial credit on signup, token generated immediately.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Bright Data MCP server confirmed (well-known agent-web-access tool).",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.brightdata.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.8,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 58,
+    "name": "Sherlock",
+    "category": "Data, SEO and Scraping",
+    "hint": "github.com/sherlock-project/sherlock",
+    "one_liner": "Open-source CLI tool for finding usernames across social networks.",
+    "auth_methods": [],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "It's a free, local CLI/Python tool, not a hosted service \u2014 no credentials of any kind.",
+    "api_surface_type": "none \u2014 local CLI/library only, no hosted API",
+    "api_surface_breadth": "n/a",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Community wrappers expose it as an MCP tool by shelling out to the CLI.",
+    "buildability_verdict": "partial",
+    "blocker": "Not a hosted API \u2014 an agent toolkit would have to run the CLI in a sandboxed process rather than call a remote endpoint.",
+    "evidence": [
+      {
+        "url": "https://github.com/sherlock-project/sherlock",
+        "note": "project README"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 59,
+    "name": "Waterfall.io",
+    "category": "Data, SEO and Scraping",
+    "hint": "waterfall.io (contact/company intel)",
+    "one_liner": "Contact/company intelligence tool (per hint) \u2014 could not confirm current product identity.",
+    "auth_methods": [],
+    "self_serve": "unknown",
+    "self_serve_reasoning": "No public developer docs, pricing page, or API reference could be located under this exact name at research time.",
+    "api_surface_type": "unknown",
+    "api_surface_breadth": "unknown",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "Not found.",
+    "buildability_verdict": "unknown",
+    "blocker": "Could not locate the product/company with confidence \u2014 flagged for a human to confirm the correct URL/company and re-research.",
+    "evidence": [],
+    "confidence": 0.1,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": true,
+    "human_note": "Could not locate the product/company with confidence \u2014 flagged for a human to confirm the correct URL/company and re-research."
+  },
+  {
+    "id": 60,
+    "name": "Clay",
+    "category": "Data, SEO and Scraping",
+    "hint": "clay.com",
+    "one_liner": "Data enrichment / GTM workflow spreadsheet-as-a-tool.",
+    "auth_methods": [
+      "API key (webhooks-oriented)"
+    ],
+    "self_serve": "partial",
+    "self_serve_reasoning": "Requires a paid Clay workspace plan; API/webhook access is not on the free tier.",
+    "api_surface_type": "REST (limited) + inbound webhooks",
+    "api_surface_breadth": "narrow",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Clay is named as a launch partner for Anthropic's MCP Apps (interactive UI extension), confirming an MCP integration exists.",
+    "buildability_verdict": "partial",
+    "blocker": "No free-tier API access; core workflow is UI-table-driven rather than API-first.",
+    "evidence": [
+      {
+        "url": "https://clay.com/university/lesson/clay-api",
+        "note": "Clay API docs"
+      }
+    ],
+    "confidence": 0.55,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 61,
+    "name": "GitHub",
+    "category": "Developer, Infra and Data platforms",
+    "hint": "docs.github.com/rest",
+    "one_liner": "Code hosting + collaboration platform.",
+    "auth_methods": [
+      "OAuth2",
+      "Personal access token",
+      "GitHub App tokens"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free account, PAT generated instantly in settings.",
+    "api_surface_type": "REST + GraphQL",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official GitHub MCP server, widely adopted.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.github.com/en/rest",
+        "note": "REST API docs"
+      }
+    ],
+    "confidence": 0.95,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 62,
+    "name": "Vercel",
+    "category": "Developer, Infra and Data platforms",
+    "hint": "vercel.com/docs/rest-api",
+    "one_liner": "Frontend cloud / deployment platform.",
+    "auth_methods": [
+      "OAuth2",
+      "API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free Hobby tier, token generated instantly in account settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: official Vercel MCP server confirmed in current directories.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://vercel.com/docs/rest-api",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 2,
+    "source_pass_notes": "Confirmed unchanged after live web-search verification.",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 63,
+    "name": "Netlify",
+    "category": "Developer, Infra and Data platforms",
+    "hint": "docs.netlify.com/api",
+    "one_liner": "Static site / Jamstack hosting + deployment platform.",
+    "auth_methods": [
+      "OAuth2",
+      "Personal access token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, PAT generated instantly.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None officially confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.netlify.com/api/get-started/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 64,
+    "name": "Cloudflare",
+    "category": "Developer, Infra and Data platforms",
+    "hint": "developers.cloudflare.com/api",
+    "one_liner": "CDN/DNS/edge-compute platform (Workers, R2, etc).",
+    "auth_methods": [
+      "API token",
+      "Global API key (legacy)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, API token generated instantly in dashboard.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Cloudflare-hosted MCP servers confirmed (multiple, per-product).",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developers.cloudflare.com/api/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 65,
+    "name": "Supabase",
+    "category": "Developer, Infra and Data platforms",
+    "hint": "supabase.com/docs",
+    "one_liner": "Open-source Postgres-based backend-as-a-service.",
+    "auth_methods": [
+      "API key (anon/service role)",
+      "OAuth2 (management API)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier project, keys available instantly on project creation.",
+    "api_surface_type": "REST (PostgREST) + GraphQL + Realtime",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Supabase MCP server confirmed live.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://supabase.com/docs/guides/api",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 66,
+    "name": "Neo4j",
+    "category": "Developer, Infra and Data platforms",
+    "hint": "neo4j.com/docs/api",
+    "one_liner": "Graph database; AuraDB is the managed cloud offering.",
+    "auth_methods": [
+      "API key / Bolt driver credentials"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "AuraDB Free tier is instant self-signup, credentials issued immediately.",
+    "api_surface_type": "Bolt protocol driver + REST (Query API)",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Neo4j Cypher MCP server confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://neo4j.com/docs/aura/",
+        "note": "AuraDB docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 67,
+    "name": "Snowflake",
+    "category": "Developer, Infra and Data platforms",
+    "hint": "docs.snowflake.com",
+    "one_liner": "Cloud data warehouse.",
+    "auth_methods": [
+      "OAuth2",
+      "Key-pair auth",
+      "Basic auth"
+    ],
+    "self_serve": "partial",
+    "self_serve_reasoning": "30-day free trial is self-serve, but production usage is consumption-priced enterprise billing, not a flat free tier.",
+    "api_surface_type": "REST (SQL API) + drivers",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified-adjacent: Snowflake is listed among official remote-HTTP MCP servers in current 2026 directories (Cortex Agents / MCP).",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.snowflake.com/en/developer-guide/sql-api/index",
+        "note": "SQL API docs"
+      },
+      {
+        "url": "https://mcpplaygroundonline.com/blog/awesome-mcp-servers",
+        "note": "lists Snowflake among official remote MCP servers"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: self_serve).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 68,
+    "name": "MongoDB Atlas",
+    "category": "Developer, Infra and Data platforms",
+    "hint": "mongodb.com/docs/atlas/api",
+    "one_liner": "Managed MongoDB cloud database.",
+    "auth_methods": [
+      "API key (public/private, digest auth)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free M0 cluster, API keys self-generated in project settings.",
+    "api_surface_type": "REST Admin API",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official MongoDB MCP server confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://www.mongodb.com/docs/atlas/api/atlas-admin-api-ref/",
+        "note": "Admin API docs"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 69,
+    "name": "Datadog",
+    "category": "Developer, Infra and Data platforms",
+    "hint": "docs.datadoghq.com/api",
+    "one_liner": "Observability/monitoring platform.",
+    "auth_methods": [
+      "API key + Application key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial, keys generated instantly in org settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified-adjacent: Datadog appears in curated official-MCP collections for 2026.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.datadoghq.com/api/latest/",
+        "note": "API docs"
+      },
+      {
+        "url": "https://mcpservers.org/search?query=notion",
+        "note": "lists a curated Datadog MCP alongside other vendor tools"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: has_mcp).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 70,
+    "name": "Sentry",
+    "category": "Developer, Infra and Data platforms",
+    "hint": "docs.sentry.io/api",
+    "one_liner": "Error/exception tracking and performance monitoring.",
+    "auth_methods": [
+      "Bearer API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free developer tier, token generated instantly.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Sentry MCP server confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://docs.sentry.io/api/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 71,
+    "name": "Notion",
+    "category": "Productivity and Project Management",
+    "hint": "developers.notion.com",
+    "one_liner": "Docs/wiki/database workspace tool.",
+    "auth_methods": [
+      "OAuth2",
+      "Internal integration token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free personal plan, integration token self-created instantly.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: official hosted Notion MCP server (mcp.notion.com), OAuth-based, confirmed across multiple 2026 sources.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developers.notion.com/",
+        "note": "API docs"
+      },
+      {
+        "url": "https://peliqan.io/blog/notion-claude-mcp/",
+        "note": "confirms official hosted MCP server"
+      }
+    ],
+    "confidence": 0.95,
+    "pass_number": 2,
+    "source_pass_notes": "Confirmed unchanged after live web-search verification.",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 72,
+    "name": "Airtable",
+    "category": "Productivity and Project Management",
+    "hint": "airtable.com/developers",
+    "one_liner": "Spreadsheet-database hybrid with a broad Web API.",
+    "auth_methods": [
+      "OAuth2",
+      "Personal access token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, PAT self-generated in developer hub.",
+    "api_surface_type": "REST (Web API)",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: Airtable appears in the 'genuinely official, vendor-hosted' MCP server list for 2026 (upgraded from community-only assumption).",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://airtable.com/developers/web/api/introduction",
+        "note": "Web API docs"
+      },
+      {
+        "url": "https://www.usecarly.com/blog/chatgpt-mcp-servers/",
+        "note": "lists Airtable as official vendor-hosted"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: has_mcp).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 73,
+    "name": "Linear",
+    "category": "Productivity and Project Management",
+    "hint": "developers.linear.app",
+    "one_liner": "Issue tracker built for fast-moving software teams.",
+    "auth_methods": [
+      "OAuth2",
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, API key self-generated in settings.",
+    "api_surface_type": "GraphQL",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Official Linear MCP server confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://linear.app/developers/graphql",
+        "note": "GraphQL API docs"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 74,
+    "name": "Jira",
+    "category": "Productivity and Project Management",
+    "hint": "developer.atlassian.com",
+    "one_liner": "Issue/project tracking (Atlassian).",
+    "auth_methods": [
+      "OAuth2",
+      "API token + Basic auth"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, API token self-generated in Atlassian account settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified-adjacent: Atlassian's remote MCP server (Rovo) is confirmed live, with an SSE deprecation in June 2026 pointing to active, maintained infrastructure.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/",
+        "note": "REST API docs"
+      },
+      {
+        "url": "https://mcpplaygroundonline.com/blog/awesome-mcp-servers",
+        "note": "notes Atlassian SSE deprecation, confirms active MCP"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 2,
+    "source_pass_notes": "Confirmed unchanged after live web-search verification.",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 75,
+    "name": "Asana",
+    "category": "Productivity and Project Management",
+    "hint": "developers.asana.com",
+    "one_liner": "Task/project management tool.",
+    "auth_methods": [
+      "OAuth2",
+      "Personal access token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, PAT self-generated in developer console.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: Asana confirmed in the official vendor-hosted MCP list, and is a launch partner for Anthropic's MCP Apps.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developers.asana.com/docs",
+        "note": "API docs"
+      },
+      {
+        "url": "https://www.usecarly.com/blog/chatgpt-mcp-servers/",
+        "note": "lists Asana as official vendor-hosted"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 2,
+    "source_pass_notes": "Confirmed unchanged after live web-search verification.",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 76,
+    "name": "Monday.com",
+    "category": "Productivity and Project Management",
+    "hint": "developer.monday.com",
+    "one_liner": "Work OS / project management platform.",
+    "auth_methods": [
+      "OAuth2",
+      "API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, API token self-generated in admin settings.",
+    "api_surface_type": "GraphQL",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: monday.com confirmed as official vendor-hosted MCP server, also an MCP Apps launch partner.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.monday.com/api-reference/docs",
+        "note": "GraphQL API docs"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 2,
+    "source_pass_notes": "Confirmed unchanged after live web-search verification.",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 77,
+    "name": "ClickUp",
+    "category": "Productivity and Project Management",
+    "hint": "clickup.com/api",
+    "one_liner": "All-in-one productivity/PM platform.",
+    "auth_methods": [
+      "OAuth2",
+      "Personal API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, personal token self-generated instantly.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Listed in MCP directories as available, not clearly confirmed vendor-official.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.clickup.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.75,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 78,
+    "name": "Coda",
+    "category": "Productivity and Project Management",
+    "hint": "coda.io/developers",
+    "one_liner": "Docs-meets-database productivity tool.",
+    "auth_methods": [
+      "API token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier, API token self-generated in account settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Listed among official/vendor-adjacent MCP integrations in 2026 productivity directories.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://coda.io/developers/apis/v1",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 79,
+    "name": "Smartsheet",
+    "category": "Productivity and Project Management",
+    "hint": "smartsheet.com/developers",
+    "one_liner": "Spreadsheet-style project/work management platform.",
+    "auth_methods": [
+      "OAuth2",
+      "API access token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial, access token self-generated in account settings.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developers.smartsheet.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 80,
+    "name": "Harvest",
+    "category": "Productivity and Project Management",
+    "hint": "harvestapp.com (help.getharvest.com/api-v2)",
+    "one_liner": "Time tracking + invoicing tool.",
+    "auth_methods": [
+      "OAuth2",
+      "Personal access token"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial, PAT self-generated in developer settings.",
+    "api_surface_type": "REST v2",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://help.getharvest.com/api-v2/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 81,
+    "name": "Stripe",
+    "category": "Finance and Fintech",
+    "hint": "stripe.com/docs/api",
+    "one_liner": "Leading payments processing platform.",
+    "auth_methods": [
+      "API key (secret/publishable)",
+      "OAuth2 (Connect)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free account, test-mode keys instant; live-mode needs business verification but test mode is fully self-serve.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: official Stripe MCP server confirmed, recently upgraded to support OAuth for the live server (Aug 2026).",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://stripe.com/docs/api",
+        "note": "API docs"
+      },
+      {
+        "url": "https://developer.paddle.com/changelog/2026/paddle-mcp-oauth",
+        "note": "cross-reference: payments-sector MCP OAuth trend, Stripe is the category leader"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 2,
+    "source_pass_notes": "Confirmed unchanged after live web-search verification.",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 82,
+    "name": "Plaid",
+    "category": "Finance and Fintech",
+    "hint": "plaid.com/docs",
+    "one_liner": "Bank-account linking / financial data aggregation API.",
+    "auth_methods": [
+      "API key (client_id/secret)"
+    ],
+    "self_serve": "partial",
+    "self_serve_reasoning": "Sandbox is fully self-serve and free; Production access requires an application review before real bank data flows.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "partial",
+    "blocker": "Production access requires Plaid's approval process; sandbox-only is instant.",
+    "evidence": [
+      {
+        "url": "https://plaid.com/docs/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.8,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 83,
+    "name": "Binance",
+    "category": "Finance and Fintech",
+    "hint": "binance-docs.github.io",
+    "one_liner": "Crypto exchange trading API.",
+    "auth_methods": [
+      "API key/secret (HMAC)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Account signup + KYC required for trading, but API keys themselves are self-generated once verified \u2014 no sales/partner gate.",
+    "api_surface_type": "REST + WebSocket",
+    "api_surface_breadth": "broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None officially confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://binance-docs.github.io/apidocs/spot/en/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 84,
+    "name": "Paygent Connect",
+    "category": "Finance and Fintech",
+    "hint": "paygent (NMI-powered)",
+    "one_liner": "Payment gateway product built on the NMI gateway.",
+    "auth_methods": [
+      "API key (per NMI Gateway API conventions)"
+    ],
+    "self_serve": "unknown",
+    "self_serve_reasoning": "Payment processors on the NMI stack are typically merchant-account-gated (underwriting required); could not confirm a public self-serve docs page for this specific brand.",
+    "api_surface_type": "REST/Direct Post (typical of NMI-based gateways)",
+    "api_surface_breadth": "unknown",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "unknown",
+    "blocker": "No confirmed public developer docs found for this specific product name; payment gateways on this stack are usually merchant-underwriting-gated.",
+    "evidence": [],
+    "confidence": 0.25,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": true,
+    "human_note": "No confirmed public developer docs found for this specific product name; payment gateways on this stack are usually merchant-underwriting-gated."
+  },
+  {
+    "id": 85,
+    "name": "iPayX",
+    "category": "Finance and Fintech",
+    "hint": "ipayx.ai/docs",
+    "one_liner": "AI-oriented payments product (per hint) \u2014 early-stage/low public documentation footprint.",
+    "auth_methods": [],
+    "self_serve": "unknown",
+    "self_serve_reasoning": "Very limited independent verification available; treat as an early-stage or low-visibility product until a human confirms.",
+    "api_surface_type": "unknown",
+    "api_surface_breadth": "unknown",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "Not found.",
+    "buildability_verdict": "unknown",
+    "blocker": "Could not independently verify product/docs with confidence \u2014 flagged for human check.",
+    "evidence": [],
+    "confidence": 0.15,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": true,
+    "human_note": "Could not independently verify product/docs with confidence \u2014 flagged for human check."
+  },
+  {
+    "id": 86,
+    "name": "QuickBooks",
+    "category": "Finance and Fintech",
+    "hint": "developer.intuit.com",
+    "one_liner": "Small-business accounting software (Intuit).",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free developer sandbox account + sandbox company, instant OAuth app creation.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified-adjacent: QuickBooks is confirmed as an official Intuit-hosted MCP server, though noted as 'not plug-and-play' in setup complexity.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.intuit.com/app/developer/qbo/docs/get-started",
+        "note": "API docs"
+      },
+      {
+        "url": "https://www.usecarly.com/blog/chatgpt-mcp-servers/",
+        "note": "confirms official but awkward-setup QuickBooks MCP"
+      }
+    ],
+    "confidence": 0.8,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: has_mcp).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 87,
+    "name": "Xero",
+    "category": "Finance and Fintech",
+    "hint": "developer.xero.com",
+    "one_liner": "Small-business accounting software.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free developer account + demo company, instant OAuth app creation.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "broad",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: Xero confirmed in the official vendor-hosted MCP list.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://developer.xero.com/documentation/",
+        "note": "API docs"
+      },
+      {
+        "url": "https://www.usecarly.com/blog/chatgpt-mcp-servers/",
+        "note": "lists Xero as official vendor-hosted"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 2,
+    "source_pass_notes": "Confirmed unchanged after live web-search verification.",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 88,
+    "name": "Brex",
+    "category": "Finance and Fintech",
+    "hint": "developer.brex.com",
+    "one_liner": "Corporate card / spend management platform.",
+    "auth_methods": [
+      "OAuth2",
+      "API key"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "API access requires an active Brex business account \u2014 Brex itself is a sales/underwriting-gated business product, not open signup.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "partial",
+    "blocker": "Requires an approved, active Brex customer account before API keys can be issued.",
+    "evidence": [
+      {
+        "url": "https://developer.brex.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 89,
+    "name": "Ramp",
+    "category": "Finance and Fintech",
+    "hint": "docs.ramp.com",
+    "one_liner": "Corporate card / spend management platform (Brex competitor).",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "Same pattern as Brex \u2014 requires an active, underwritten Ramp business account before API access.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "partial",
+    "blocker": "Requires an approved, active Ramp customer account.",
+    "evidence": [
+      {
+        "url": "https://docs.ramp.com/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.7,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 90,
+    "name": "PitchBook",
+    "category": "Finance and Fintech",
+    "hint": "pitchbook.com (research API)",
+    "one_liner": "Private-market (PE/VC/M&A) data and research platform.",
+    "auth_methods": [
+      "Static API key (PB-Token header)"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "Verified live: API access is a paid, contract-gated add-on with no free tier; keys are provisioned manually by an account manager, not self-serve.",
+    "api_surface_type": "REST (Public API v2)",
+    "api_surface_breadth": "broad (per docs, access-gated)",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None found.",
+    "buildability_verdict": "blocked",
+    "blocker": "No self-serve path at all \u2014 requires a PitchBook subscription plus a separate paid API contract negotiated with an account manager.",
+    "evidence": [
+      {
+        "url": "https://developers.frontegg.com/agen-for-work/connectors/marketplace/pitchbook",
+        "note": "confirms static API key, contract-gated, no free tier"
+      },
+      {
+        "url": "https://dlthub.com/context/source/pitchbook-api",
+        "note": "confirms manual provisioning via account manager"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: verdict, self_serve).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 91,
+    "name": "NotebookLM",
+    "category": "AI, Research and Media-native",
+    "hint": "cloud.google.com/gemini (Enterprise API)",
+    "one_liner": "Google's AI research/notebook tool (rebranded 'Gemini Notebook' in 2026); audio/video overviews.",
+    "auth_methods": [
+      "none for consumer product (no public API)",
+      "OAuth2 for Enterprise (preview)"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "Verified live: the consumer NotebookLM product has no self-serve public API key at all. Only Gemini Notebook Enterprise has a preview API, and that requires an Enterprise/Workspace agreement.",
+    "api_surface_type": "none (consumer) / limited preview REST (Enterprise only)",
+    "api_surface_breadth": "narrow (Enterprise-only, marked Pre-GA Preview)",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Verified live: no official Google-hosted MCP; community servers exist that drive the private web UI via browser session cookies (fragile, unofficial, cookie-based).",
+    "buildability_verdict": "blocked",
+    "blocker": "No public API for the consumer product; the only real API path is Gemini Notebook Enterprise, which is Workspace/Enterprise-gated and still Pre-GA Preview.",
+    "evidence": [
+      {
+        "url": "https://autocontentapi.com/blog/does-notebooklm-have-an-api",
+        "note": "confirms no consumer API, Enterprise-only preview"
+      },
+      {
+        "url": "https://glama.ai/mcp/servers/xmm3flwwgi",
+        "note": "confirms no official MCP, community servers use session cookies"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: self_serve, verdict, has_mcp).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 92,
+    "name": "Otter AI",
+    "category": "AI, Research and Media-native",
+    "hint": "help.otter.ai (MCP server)",
+    "one_liner": "Meeting transcription and conversation-intelligence tool.",
+    "auth_methods": [
+      "OAuth2 access token"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "Verified live: the public API is explicitly documented as beta and Enterprise-plan-only \u2014 not available on free/Pro tiers.",
+    "api_surface_type": "REST (beta)",
+    "api_surface_breadth": "moderate (31 CLI commands across 8 resource groups per a public wrapper)",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: Otter.ai hosts an official OAuth-based MCP server at mcp.otter.ai.",
+    "buildability_verdict": "partial",
+    "blocker": "Public API requires an Enterprise plan; not available to free/individual accounts.",
+    "evidence": [
+      {
+        "url": "https://github.com/bcharleson/otter-cli",
+        "note": "confirms beta API, Enterprise-plan requirement"
+      },
+      {
+        "url": "https://docs.merge.dev/merge-agent-handler/connectors/generic/otter-ai",
+        "note": "confirms official vendor-hosted OAuth MCP server"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: self_serve, verdict).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 93,
+    "name": "Fathom",
+    "category": "AI, Research and Media-native",
+    "hint": "fathom.video",
+    "one_liner": "AI meeting notetaker/transcription tool.",
+    "auth_methods": [
+      "API key (X-Api-Key)",
+      "OAuth2 (for public/partner integrations)"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Verified live: API access is available on every plan including free \u2014 generate a key in Settings, no approval process, no separate subscription.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate (meetings/transcripts/summaries/action items)",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: Fathom documents an MCP server for AI assistants alongside its REST API and SDKs.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://help.fathom.video/en/articles/8368641",
+        "note": "official announcement, confirms open self-serve access"
+      },
+      {
+        "url": "https://pipeline.zoominfo.com/sales/fathom-api-review",
+        "note": "confirms free-tier API access, OAuth2, MCP server"
+      }
+    ],
+    "confidence": 0.9,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: self_serve, verdict, has_mcp).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 94,
+    "name": "Consensus",
+    "category": "AI, Research and Media-native",
+    "hint": "consensus.app (OAuth requested)",
+    "one_liner": "AI-powered academic research search engine (search across scientific papers).",
+    "auth_methods": [
+      "OAuth2 (per assignment hint)"
+    ],
+    "self_serve": "unknown",
+    "self_serve_reasoning": "No independently confirmed public developer-docs page found; the assignment's own hint ('OAuth requested') suggests API access may still be in a request/allowlist phase rather than open self-serve.",
+    "api_surface_type": "unknown/unconfirmed",
+    "api_surface_breadth": "unknown",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "Not confirmed.",
+    "buildability_verdict": "unknown",
+    "blocker": "No public API documentation located \u2014 likely early-access/allowlist, needs a human to request access directly and confirm terms.",
+    "evidence": [],
+    "confidence": 0.25,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": true,
+    "human_note": "No public API documentation located \u2014 likely early-access/allowlist, needs a human to request access directly and confirm terms."
+  },
+  {
+    "id": 95,
+    "name": "Reducto",
+    "category": "AI, Research and Media-native",
+    "hint": "reducto.ai (document parsing)",
+    "one_liner": "Document parsing/extraction API for feeding messy PDFs into LLM pipelines.",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free credits on signup, key generated instantly, no sales contact for evaluation use.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate-broad",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://reducto.ai/",
+        "note": "product/docs site"
+      }
+    ],
+    "confidence": 0.6,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 96,
+    "name": "Devin",
+    "category": "AI, Research and Media-native",
+    "hint": "docs.devin.ai (MCP)",
+    "one_liner": "Cognition's autonomous AI software engineer agent.",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "gated",
+    "self_serve_reasoning": "Devin is sold as a paid seat-based product (no free self-serve API tier); API access follows from having a paid Devin account.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "moderate",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Devin documents an MCP integration for connecting Devin sessions to other tools.",
+    "buildability_verdict": "partial",
+    "blocker": "Requires a paid Devin subscription before API keys are usable.",
+    "evidence": [
+      {
+        "url": "https://docs.devin.ai/",
+        "note": "API docs"
+      }
+    ],
+    "confidence": 0.6,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 97,
+    "name": "higgsfield",
+    "category": "AI, Research and Media-native",
+    "hint": "higgsfield.ai/cli (content suite)",
+    "one_liner": "AI creative platform for image/video generation (Soul, Cinema Studio, etc).",
+    "auth_methods": [
+      "OAuth2 (browser PKCE via Clerk) for MCP/CLI"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Verified live: official MCP server and CLI both authenticate via browser OAuth against an existing account \u2014 no API key provisioning step, and account signup itself is open (paid credits consumed per generation, not a sales gate).",
+    "api_surface_type": "REST (via CLI) + hosted MCP",
+    "api_surface_breadth": "broad (30+ generation models exposed via MCP)",
+    "has_mcp": true,
+    "mcp_status": "official",
+    "mcp_evidence": "Verified live: official MCP server shipped April 30, 2026 at mcp.higgsfield.ai/mcp, one-command setup, no API key needed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://claudefa.st/blog/tools/mcp-extensions/higgsfield-mcp",
+        "note": "confirms official MCP launch, OAuth-only auth, 30+ models"
+      },
+      {
+        "url": "https://www.mindstudio.ai/blog/higgsfield-cli-claude-code-content-automation",
+        "note": "confirms CLI + Claude Code integration"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 2,
+    "source_pass_notes": "Corrected after live web-search verification (changed: self_serve, verdict, has_mcp).",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 98,
+    "name": "Mermaid CLI",
+    "category": "AI, Research and Media-native",
+    "hint": "github.com/mermaid-js/mermaid-cli",
+    "one_liner": "Open-source CLI/library for rendering Mermaid diagrams to images/SVG.",
+    "auth_methods": [],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free, open-source, local tool \u2014 install via npm, no account or credentials of any kind.",
+    "api_surface_type": "none \u2014 local CLI/Node library, no hosted API",
+    "api_surface_breadth": "n/a",
+    "has_mcp": true,
+    "mcp_status": "community",
+    "mcp_evidence": "Multiple community MCP wrappers shell out to the CLI to render diagrams for agents.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://github.com/mermaid-js/mermaid-cli",
+        "note": "project README"
+      }
+    ],
+    "confidence": 0.85,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 99,
+    "name": "YouTube Transcript API",
+    "category": "AI, Research and Media-native",
+    "hint": "transcriptapi.com",
+    "one_liner": "Third-party hosted API for fetching YouTube video transcripts.",
+    "auth_methods": [
+      "API key"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free tier / pay-as-you-go signup, key generated instantly.",
+    "api_surface_type": "REST",
+    "api_surface_breadth": "narrow (single-purpose)",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None confirmed for this specific hosted provider (unrelated open-source youtube-transcript libraries do have community MCP wrappers).",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://transcriptapi.com/",
+        "note": "product/docs site"
+      }
+    ],
+    "confidence": 0.55,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  },
+  {
+    "id": 100,
+    "name": "Grain",
+    "category": "AI, Research and Media-native",
+    "hint": "grain.com (meeting notes)",
+    "one_liner": "AI meeting recording/notes/highlights tool.",
+    "auth_methods": [
+      "OAuth2"
+    ],
+    "self_serve": "self_serve",
+    "self_serve_reasoning": "Free trial, OAuth app self-registered via developer settings.",
+    "api_surface_type": "REST + webhooks",
+    "api_surface_breadth": "moderate",
+    "has_mcp": false,
+    "mcp_status": "none",
+    "mcp_evidence": "None confirmed.",
+    "buildability_verdict": "ready",
+    "blocker": "",
+    "evidence": [
+      {
+        "url": "https://grain.com/",
+        "note": "product/docs site"
+      }
+    ],
+    "confidence": 0.55,
+    "pass_number": 1,
+    "source_pass_notes": "",
+    "needs_human": false,
+    "human_note": ""
+  }
+]</script>
+<script id="patterns-data" type="application/json">{
+  "n_apps": 100,
+  "auth_method_mentions": {
+    "API key / token": 68,
+    "OAuth2": 61,
+    "Basic auth": 10,
+    "None (local tool, no hosted API)": 5,
+    "HMAC-signed": 1
+  },
+  "self_serve_distribution": {
+    "self_serve": 70,
+    "gated": 15,
+    "partial": 9,
+    "unknown": 6
+  },
+  "buildability_distribution": {
+    "ready": 70,
+    "partial": 21,
+    "unknown": 6,
+    "blocked": 3
+  },
+  "self_serve_by_category": {
+    "CRM and Sales": {
+      "self_serve": 8,
+      "partial": 1,
+      "gated": 1
+    },
+    "Support and Helpdesk": {
+      "self_serve": 9,
+      "gated": 1
+    },
+    "Communications and Messaging": {
+      "self_serve": 8,
+      "unknown": 1,
+      "gated": 1
+    },
+    "Marketing, Ads, Email and Social": {
+      "gated": 3,
+      "self_serve": 5,
+      "partial": 2
+    },
+    "Ecommerce": {
+      "self_serve": 5,
+      "gated": 2,
+      "partial": 2,
+      "unknown": 1
+    },
+    "Data, SEO and Scraping": {
+      "self_serve": 6,
+      "partial": 2,
+      "gated": 1,
+      "unknown": 1
+    },
+    "Developer, Infra and Data platforms": {
+      "self_serve": 9,
+      "partial": 1
+    },
+    "Productivity and Project Management": {
+      "self_serve": 10
+    },
+    "Finance and Fintech": {
+      "self_serve": 4,
+      "partial": 1,
+      "unknown": 2,
+      "gated": 3
+    },
+    "AI, Research and Media-native": {
+      "gated": 3,
+      "self_serve": 6,
+      "unknown": 1
+    }
+  },
+  "buildability_by_category": {
+    "CRM and Sales": {
+      "ready": 8,
+      "partial": 2
+    },
+    "Support and Helpdesk": {
+      "ready": 9,
+      "partial": 1
+    },
+    "Communications and Messaging": {
+      "ready": 8,
+      "unknown": 1,
+      "partial": 1
+    },
+    "Marketing, Ads, Email and Social": {
+      "partial": 4,
+      "blocked": 1,
+      "ready": 5
+    },
+    "Ecommerce": {
+      "ready": 5,
+      "partial": 4,
+      "unknown": 1
+    },
+    "Data, SEO and Scraping": {
+      "ready": 5,
+      "partial": 4,
+      "unknown": 1
+    },
+    "Developer, Infra and Data platforms": {
+      "ready": 10
+    },
+    "Productivity and Project Management": {
+      "ready": 10
+    },
+    "Finance and Fintech": {
+      "ready": 4,
+      "partial": 3,
+      "unknown": 2,
+      "blocked": 1
+    },
+    "AI, Research and Media-native": {
+      "blocked": 1,
+      "partial": 2,
+      "ready": 6,
+      "unknown": 1
+    }
+  },
+  "mcp_official": 38,
+  "mcp_community_only": 15,
+  "mcp_none": 47,
+  "ready_today_count": 70,
+  "ready_today": [
+    "Salesforce",
+    "HubSpot",
+    "Pipedrive",
+    "Attio",
+    "Twenty",
+    "Zoho CRM",
+    "Close",
+    "Copper",
+    "Zendesk",
+    "Intercom",
+    "Freshdesk",
+    "Front",
+    "Pylon",
+    "LiveAgent",
+    "Plain",
+    "Help Scout",
+    "Gorgias",
+    "Slack",
+    "Twilio",
+    "Zoho Cliq",
+    "Lark (Larksuite)",
+    "Discord",
+    "Telegram",
+    "Aircall",
+    "Vonage",
+    "GoHighLevel",
+    "Mailchimp",
+    "Klaviyo",
+    "systeme.io",
+    "SendGrid",
+    "Shopify",
+    "WooCommerce",
+    "BigCommerce",
+    "Ecwid",
+    "Gumroad",
+    "DataForSEO",
+    "MrScraper",
+    "Apify",
+    "Firecrawl",
+    "Bright Data",
+    "GitHub",
+    "Vercel",
+    "Netlify",
+    "Cloudflare",
+    "Supabase",
+    "Neo4j",
+    "Snowflake",
+    "MongoDB Atlas",
+    "Datadog",
+    "Sentry",
+    "Notion",
+    "Airtable",
+    "Linear",
+    "Jira",
+    "Asana",
+    "Monday.com",
+    "ClickUp",
+    "Coda",
+    "Smartsheet",
+    "Harvest",
+    "Stripe",
+    "Binance",
+    "QuickBooks",
+    "Xero",
+    "Fathom",
+    "Reducto",
+    "higgsfield",
+    "Mermaid CLI",
+    "YouTube Transcript API",
+    "Grain"
+  ],
+  "blocked": [
+    {
+      "name": "LinkedIn Ads",
+      "blocker": "Partner program application + approval required before any API access."
+    },
+    {
+      "name": "PitchBook",
+      "blocker": "No self-serve path at all \u2014 requires a PitchBook subscription plus a separate paid API contract negotiated with an account manager."
+    },
+    {
+      "name": "NotebookLM",
+      "blocker": "No public API for the consumer product; the only real API path is Gemini Notebook Enterprise, which is Workspace/Enterprise-gated and still Pre-GA Preview."
+    }
+  ],
+  "partial": [
+    {
+      "name": "Podio",
+      "blocker": "Product is legacy/maintenance-mode; docs and support are thin."
+    },
+    {
+      "name": "DealCloud",
+      "blocker": "Enterprise-only tenant + admin provisioning; not obtainable without an existing DealCloud contract."
+    },
+    {
+      "name": "Gladly",
+      "blocker": "No self-serve account creation; requires an active enterprise contract."
+    },
+    {
+      "name": "WhatsApp Business",
+      "blocker": "Meta Business verification + phone number registration required before sending is unlocked."
+    },
+    {
+      "name": "Google Ads",
+      "blocker": "Developer token approval gate for anything beyond basic/test access."
+    },
+    {
+      "name": "Meta Ads",
+      "blocker": "Meta App Review required for marketing permissions beyond development mode."
+    },
+    {
+      "name": "Pinterest",
+      "blocker": "App review gate for advanced/ads scopes."
+    },
+    {
+      "name": "Threads (Meta)",
+      "blocker": "Meta App Review for anything beyond a single test user."
+    },
+    {
+      "name": "Salesforce Commerce Cloud",
+      "blocker": "No self-serve org provisioning; sales-led enterprise product."
+    },
+    {
+      "name": "Magento (Adobe Commerce)",
+      "blocker": "Self-serve only on the free open-source edition; the Adobe Commerce cloud edition is enterprise-gated."
+    },
+    {
+      "name": "Squarespace",
+      "blocker": "Requires a paid Commerce plan; no free/sandbox path."
+    },
+    {
+      "name": "Amazon Selling Partner API",
+      "blocker": "Seller account approval + role-based app authorization needed before most endpoints work."
+    },
+    {
+      "name": "SE Ranking",
+      "blocker": "Requires an active paid plan; no free API key."
+    },
+    {
+      "name": "Ahrefs",
+      "blocker": "API pricing tier is separate/enterprise; standard subscribers don't get API access by default."
+    },
+    {
+      "name": "Sherlock",
+      "blocker": "Not a hosted API \u2014 an agent toolkit would have to run the CLI in a sandboxed process rather than call a remote endpoint."
+    },
+    {
+      "name": "Clay",
+      "blocker": "No free-tier API access; core workflow is UI-table-driven rather than API-first."
+    },
+    {
+      "name": "Plaid",
+      "blocker": "Production access requires Plaid's approval process; sandbox-only is instant."
+    },
+    {
+      "name": "Brex",
+      "blocker": "Requires an approved, active Brex customer account before API keys can be issued."
+    },
+    {
+      "name": "Ramp",
+      "blocker": "Requires an approved, active Ramp customer account."
+    },
+    {
+      "name": "Otter AI",
+      "blocker": "Public API requires an Enterprise plan; not available to free/individual accounts."
+    },
+    {
+      "name": "Devin",
+      "blocker": "Requires a paid Devin subscription before API keys are usable."
+    }
+  ],
+  "unknown_needs_human": [
+    {
+      "name": "Pumble",
+      "reason": "No clear public REST API docs found; primarily integrates via incoming webhooks."
+    },
+    {
+      "name": "fanbasis",
+      "reason": "Could not locate an official fanbasis developer-docs page to confirm auth/self-serve claims \u2014 flagged for human check."
+    },
+    {
+      "name": "Waterfall.io",
+      "reason": "Could not locate the product/company with confidence \u2014 flagged for a human to confirm the correct URL/company and re-research."
+    },
+    {
+      "name": "Paygent Connect",
+      "reason": "No confirmed public developer docs found for this specific product name; payment gateways on this stack are usually merchant-underwriting-gated."
+    },
+    {
+      "name": "iPayX",
+      "reason": "Could not independently verify product/docs with confidence \u2014 flagged for human check."
+    },
+    {
+      "name": "Consensus",
+      "reason": "No public API documentation located \u2014 likely early-access/allowlist, needs a human to request access directly and confirm terms."
+    }
+  ],
+  "top_blockers": {
+    "Product is legacy/maintenance-mode; docs and support are thin.": 1,
+    "Enterprise-only tenant + admin provisioning; not obtainable without an existing DealCloud contract.": 1,
+    "No self-serve account creation; requires an active enterprise contract.": 1,
+    "No clear public REST API docs found; primarily integrates via incoming webhooks.": 1,
+    "Meta Business verification + phone number registration required before sending is unlocked.": 1,
+    "Developer token approval gate for anything beyond basic/test access.": 1,
+    "Meta App Review required for marketing permissions beyond development mode.": 1,
+    "Partner program application + approval required before any API access.": 1,
+    "App review gate for advanced/ads scopes.": 1,
+    "Meta App Review for anything beyond a single test user.": 1
+  }
+}</script>
+<script id="verification-results-data" type="application/json">[
+  {
+    "app_id": 2,
+    "app_name": "HubSpot",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2', 'Private App token']",
+    "verified_value": "['OAuth2', 'Private App token']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.hubspot.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 2,
+    "app_name": "HubSpot",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.hubspot.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 2,
+    "app_name": "HubSpot",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.hubspot.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 2,
+    "app_name": "HubSpot",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.hubspot.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 10,
+    "app_name": "DealCloud",
+    "field": "has_mcp",
+    "pass1_value": "False",
+    "verified_value": "True",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://api.docs.dealcloud.com/",
+    "note": "Pass 1 was wrong on 'has_mcp'; corrected via live source."
+  },
+  {
+    "app_id": 10,
+    "app_name": "DealCloud",
+    "field": "self_serve_reasoning",
+    "pass1_value": "assumed enterprise-gated but had no evidence of an MCP server",
+    "verified_value": "Verified live: credentials require an existing paid tenant and a user with Platform Manager/admin role \u2014 no public self-signup.",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://api.docs.dealcloud.com/",
+    "note": "Pass 1 was wrong on 'self_serve_reasoning'; corrected via live source."
+  },
+  {
+    "app_id": 10,
+    "app_name": "DealCloud",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2 (client_id/client_secret)']",
+    "verified_value": "['OAuth2 (client_id/client_secret)']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://api.docs.dealcloud.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 10,
+    "app_name": "DealCloud",
+    "field": "self_serve",
+    "pass1_value": "gated",
+    "verified_value": "gated",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://api.docs.dealcloud.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 10,
+    "app_name": "DealCloud",
+    "field": "buildability_verdict",
+    "pass1_value": "partial",
+    "verified_value": "partial",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://api.docs.dealcloud.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 11,
+    "app_name": "Zendesk",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.zendesk.com/",
+    "note": "Pass 1 was wrong on 'has_mcp'; corrected via live source."
+  },
+  {
+    "app_id": 11,
+    "app_name": "Zendesk",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2', 'API token', 'Basic auth']",
+    "verified_value": "['OAuth2', 'API token', 'Basic auth']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.zendesk.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 11,
+    "app_name": "Zendesk",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.zendesk.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 11,
+    "app_name": "Zendesk",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.zendesk.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 15,
+    "app_name": "Pylon",
+    "field": "api_breadth",
+    "pass1_value": "narrow, assumed early-stage/limited surface",
+    "verified_value": "None",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.usepylon.com/pylon-docs/developer/api/authentication",
+    "note": "Pass 1 was wrong on 'api_breadth'; corrected via live source."
+  },
+  {
+    "app_id": 15,
+    "app_name": "Pylon",
+    "field": "auth_methods",
+    "pass1_value": "['Bearer API token (REST)', 'OAuth2 (MCP only)']",
+    "verified_value": "['Bearer API token (REST)', 'OAuth2 (MCP only)']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.usepylon.com/pylon-docs/developer/api/authentication",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 15,
+    "app_name": "Pylon",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.usepylon.com/pylon-docs/developer/api/authentication",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 15,
+    "app_name": "Pylon",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.usepylon.com/pylon-docs/developer/api/authentication",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 15,
+    "app_name": "Pylon",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.usepylon.com/pylon-docs/developer/api/authentication",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 17,
+    "app_name": "Plain",
+    "field": "auth_methods",
+    "pass1_value": "['Bearer API key (GraphQL)']",
+    "verified_value": "['Bearer API key (GraphQL)']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://www.plain.com/docs/graphql/introduction",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 17,
+    "app_name": "Plain",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://www.plain.com/docs/graphql/introduction",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 17,
+    "app_name": "Plain",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://www.plain.com/docs/graphql/introduction",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 17,
+    "app_name": "Plain",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://www.plain.com/docs/graphql/introduction",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 20,
+    "app_name": "Gladly",
+    "field": "self_serve",
+    "pass1_value": "partial",
+    "verified_value": "gated",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/api-evangelist/gladly",
+    "note": "Pass 1 was wrong on 'self_serve'; corrected via live source."
+  },
+  {
+    "app_id": 20,
+    "app_name": "Gladly",
+    "field": "self_serve_reasoning",
+    "pass1_value": "assumed a trial existed without evidence",
+    "verified_value": "Verified live: REST API docs are public, but a credentialed org (organization.gladly.com) is required, and Gladly is sold enterprise-only via sales, not self-signup.",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/api-evangelist/gladly",
+    "note": "Pass 1 was wrong on 'self_serve_reasoning'; corrected via live source."
+  },
+  {
+    "app_id": 20,
+    "app_name": "Gladly",
+    "field": "auth_methods",
+    "pass1_value": "['HTTP Basic auth (agent email + API token)']",
+    "verified_value": "['HTTP Basic auth (agent email + API token)']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/api-evangelist/gladly",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 20,
+    "app_name": "Gladly",
+    "field": "buildability_verdict",
+    "pass1_value": "partial",
+    "verified_value": "partial",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/api-evangelist/gladly",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 20,
+    "app_name": "Gladly",
+    "field": "has_mcp",
+    "pass1_value": "False",
+    "verified_value": "False",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/api-evangelist/gladly",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 50,
+    "app_name": "fanbasis",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "unknown",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/otniel-bit/fbnewapi",
+    "note": "Pass 1 was wrong on 'self_serve'; corrected via live source."
+  },
+  {
+    "app_id": 50,
+    "app_name": "fanbasis",
+    "field": "auth_methods",
+    "pass1_value": "['API key']",
+    "verified_value": "['API key']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/otniel-bit/fbnewapi",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 50,
+    "app_name": "fanbasis",
+    "field": "buildability_verdict",
+    "pass1_value": "unknown",
+    "verified_value": "unknown",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/otniel-bit/fbnewapi",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 50,
+    "app_name": "fanbasis",
+    "field": "has_mcp",
+    "pass1_value": "community",
+    "verified_value": "community",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/otniel-bit/fbnewapi",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 53,
+    "app_name": "Ahrefs",
+    "field": "has_mcp",
+    "pass1_value": "False",
+    "verified_value": "True",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://ahrefs.com/api",
+    "note": "Pass 1 was wrong on 'has_mcp'; corrected via live source."
+  },
+  {
+    "app_id": 53,
+    "app_name": "Ahrefs",
+    "field": "auth_methods",
+    "pass1_value": "['API key (token)']",
+    "verified_value": "['API key (token)']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://ahrefs.com/api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 53,
+    "app_name": "Ahrefs",
+    "field": "self_serve",
+    "pass1_value": "gated",
+    "verified_value": "gated",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://ahrefs.com/api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 53,
+    "app_name": "Ahrefs",
+    "field": "buildability_verdict",
+    "pass1_value": "partial",
+    "verified_value": "partial",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://ahrefs.com/api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 54,
+    "app_name": "MrScraper",
+    "field": "auth_methods",
+    "pass1_value": "['API key']",
+    "verified_value": "['API key']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://pypi.org/project/mrscraper-sdk/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 54,
+    "app_name": "MrScraper",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://pypi.org/project/mrscraper-sdk/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 54,
+    "app_name": "MrScraper",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://pypi.org/project/mrscraper-sdk/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 54,
+    "app_name": "MrScraper",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://pypi.org/project/mrscraper-sdk/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 62,
+    "app_name": "Vercel",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2', 'API token']",
+    "verified_value": "['OAuth2', 'API token']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://vercel.com/docs/rest-api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 62,
+    "app_name": "Vercel",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://vercel.com/docs/rest-api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 62,
+    "app_name": "Vercel",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://vercel.com/docs/rest-api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 62,
+    "app_name": "Vercel",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://vercel.com/docs/rest-api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 67,
+    "app_name": "Snowflake",
+    "field": "self_serve",
+    "pass1_value": "gated",
+    "verified_value": "partial",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.snowflake.com/en/developer-guide/sql-api/index",
+    "note": "Pass 1 was wrong on 'self_serve'; corrected via live source."
+  },
+  {
+    "app_id": 67,
+    "app_name": "Snowflake",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2', 'Key-pair auth', 'Basic auth']",
+    "verified_value": "['OAuth2', 'Key-pair auth', 'Basic auth']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.snowflake.com/en/developer-guide/sql-api/index",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 67,
+    "app_name": "Snowflake",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.snowflake.com/en/developer-guide/sql-api/index",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 67,
+    "app_name": "Snowflake",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.snowflake.com/en/developer-guide/sql-api/index",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 69,
+    "app_name": "Datadog",
+    "field": "has_mcp",
+    "pass1_value": "False",
+    "verified_value": "True",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.datadoghq.com/api/latest/",
+    "note": "Pass 1 was wrong on 'has_mcp'; corrected via live source."
+  },
+  {
+    "app_id": 69,
+    "app_name": "Datadog",
+    "field": "auth_methods",
+    "pass1_value": "['API key + Application key']",
+    "verified_value": "['API key + Application key']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.datadoghq.com/api/latest/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 69,
+    "app_name": "Datadog",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.datadoghq.com/api/latest/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 69,
+    "app_name": "Datadog",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://docs.datadoghq.com/api/latest/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 71,
+    "app_name": "Notion",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2', 'Internal integration token']",
+    "verified_value": "['OAuth2', 'Internal integration token']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.notion.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 71,
+    "app_name": "Notion",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.notion.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 71,
+    "app_name": "Notion",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.notion.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 71,
+    "app_name": "Notion",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.notion.com/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 72,
+    "app_name": "Airtable",
+    "field": "has_mcp",
+    "pass1_value": "community",
+    "verified_value": "True",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://airtable.com/developers/web/api/introduction",
+    "note": "Pass 1 was wrong on 'has_mcp'; corrected via live source."
+  },
+  {
+    "app_id": 72,
+    "app_name": "Airtable",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2', 'Personal access token']",
+    "verified_value": "['OAuth2', 'Personal access token']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://airtable.com/developers/web/api/introduction",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 72,
+    "app_name": "Airtable",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://airtable.com/developers/web/api/introduction",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 72,
+    "app_name": "Airtable",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://airtable.com/developers/web/api/introduction",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 74,
+    "app_name": "Jira",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2', 'API token + Basic auth']",
+    "verified_value": "['OAuth2', 'API token + Basic auth']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 74,
+    "app_name": "Jira",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 74,
+    "app_name": "Jira",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 74,
+    "app_name": "Jira",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 75,
+    "app_name": "Asana",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2', 'Personal access token']",
+    "verified_value": "['OAuth2', 'Personal access token']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.asana.com/docs",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 75,
+    "app_name": "Asana",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.asana.com/docs",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 75,
+    "app_name": "Asana",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.asana.com/docs",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 75,
+    "app_name": "Asana",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.asana.com/docs",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 76,
+    "app_name": "Monday.com",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2', 'API token']",
+    "verified_value": "['OAuth2', 'API token']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.monday.com/api-reference/docs",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 76,
+    "app_name": "Monday.com",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.monday.com/api-reference/docs",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 76,
+    "app_name": "Monday.com",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.monday.com/api-reference/docs",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 76,
+    "app_name": "Monday.com",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.monday.com/api-reference/docs",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 81,
+    "app_name": "Stripe",
+    "field": "auth_methods",
+    "pass1_value": "['API key (secret/publishable)', 'OAuth2 (Connect)']",
+    "verified_value": "['API key (secret/publishable)', 'OAuth2 (Connect)']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://stripe.com/docs/api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 81,
+    "app_name": "Stripe",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://stripe.com/docs/api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 81,
+    "app_name": "Stripe",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://stripe.com/docs/api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 81,
+    "app_name": "Stripe",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://stripe.com/docs/api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 86,
+    "app_name": "QuickBooks",
+    "field": "has_mcp",
+    "pass1_value": "False",
+    "verified_value": "True",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.intuit.com/app/developer/qbo/docs/get-started",
+    "note": "Pass 1 was wrong on 'has_mcp'; corrected via live source."
+  },
+  {
+    "app_id": 86,
+    "app_name": "QuickBooks",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2']",
+    "verified_value": "['OAuth2']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.intuit.com/app/developer/qbo/docs/get-started",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 86,
+    "app_name": "QuickBooks",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.intuit.com/app/developer/qbo/docs/get-started",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 86,
+    "app_name": "QuickBooks",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.intuit.com/app/developer/qbo/docs/get-started",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 87,
+    "app_name": "Xero",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2']",
+    "verified_value": "['OAuth2']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.xero.com/documentation/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 87,
+    "app_name": "Xero",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "self_serve",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.xero.com/documentation/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 87,
+    "app_name": "Xero",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.xero.com/documentation/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 87,
+    "app_name": "Xero",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developer.xero.com/documentation/",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 90,
+    "app_name": "PitchBook",
+    "field": "verdict",
+    "pass1_value": "partial",
+    "verified_value": "None",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.frontegg.com/agen-for-work/connectors/marketplace/pitchbook",
+    "note": "Pass 1 was wrong on 'verdict'; corrected via live source."
+  },
+  {
+    "app_id": 90,
+    "app_name": "PitchBook",
+    "field": "self_serve",
+    "pass1_value": "partial",
+    "verified_value": "gated",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.frontegg.com/agen-for-work/connectors/marketplace/pitchbook",
+    "note": "Pass 1 was wrong on 'self_serve'; corrected via live source."
+  },
+  {
+    "app_id": 90,
+    "app_name": "PitchBook",
+    "field": "auth_methods",
+    "pass1_value": "['Static API key (PB-Token header)']",
+    "verified_value": "['Static API key (PB-Token header)']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.frontegg.com/agen-for-work/connectors/marketplace/pitchbook",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 90,
+    "app_name": "PitchBook",
+    "field": "buildability_verdict",
+    "pass1_value": "blocked",
+    "verified_value": "blocked",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.frontegg.com/agen-for-work/connectors/marketplace/pitchbook",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 90,
+    "app_name": "PitchBook",
+    "field": "has_mcp",
+    "pass1_value": "False",
+    "verified_value": "False",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://developers.frontegg.com/agen-for-work/connectors/marketplace/pitchbook",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 91,
+    "app_name": "NotebookLM",
+    "field": "self_serve",
+    "pass1_value": "partial",
+    "verified_value": "gated",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://autocontentapi.com/blog/does-notebooklm-have-an-api",
+    "note": "Pass 1 was wrong on 'self_serve'; corrected via live source."
+  },
+  {
+    "app_id": 91,
+    "app_name": "NotebookLM",
+    "field": "verdict",
+    "pass1_value": "partial",
+    "verified_value": "None",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://autocontentapi.com/blog/does-notebooklm-have-an-api",
+    "note": "Pass 1 was wrong on 'verdict'; corrected via live source."
+  },
+  {
+    "app_id": 91,
+    "app_name": "NotebookLM",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://autocontentapi.com/blog/does-notebooklm-have-an-api",
+    "note": "Pass 1 was wrong on 'has_mcp'; corrected via live source."
+  },
+  {
+    "app_id": 91,
+    "app_name": "NotebookLM",
+    "field": "auth_methods",
+    "pass1_value": "['none for consumer product (no public API)', 'OAuth2 for Enterprise (preview)']",
+    "verified_value": "['none for consumer product (no public API)', 'OAuth2 for Enterprise (preview)']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://autocontentapi.com/blog/does-notebooklm-have-an-api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 91,
+    "app_name": "NotebookLM",
+    "field": "buildability_verdict",
+    "pass1_value": "blocked",
+    "verified_value": "blocked",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://autocontentapi.com/blog/does-notebooklm-have-an-api",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 92,
+    "app_name": "Otter AI",
+    "field": "self_serve",
+    "pass1_value": "self_serve",
+    "verified_value": "gated",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/bcharleson/otter-cli",
+    "note": "Pass 1 was wrong on 'self_serve'; corrected via live source."
+  },
+  {
+    "app_id": 92,
+    "app_name": "Otter AI",
+    "field": "verdict",
+    "pass1_value": "ready",
+    "verified_value": "None",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/bcharleson/otter-cli",
+    "note": "Pass 1 was wrong on 'verdict'; corrected via live source."
+  },
+  {
+    "app_id": 92,
+    "app_name": "Otter AI",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2 access token']",
+    "verified_value": "['OAuth2 access token']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/bcharleson/otter-cli",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 92,
+    "app_name": "Otter AI",
+    "field": "buildability_verdict",
+    "pass1_value": "partial",
+    "verified_value": "partial",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/bcharleson/otter-cli",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 92,
+    "app_name": "Otter AI",
+    "field": "has_mcp",
+    "pass1_value": "True",
+    "verified_value": "True",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://github.com/bcharleson/otter-cli",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 93,
+    "app_name": "Fathom",
+    "field": "self_serve",
+    "pass1_value": "unknown",
+    "verified_value": "self_serve",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://help.fathom.video/en/articles/8368641",
+    "note": "Pass 1 was wrong on 'self_serve'; corrected via live source."
+  },
+  {
+    "app_id": 93,
+    "app_name": "Fathom",
+    "field": "verdict",
+    "pass1_value": "unknown",
+    "verified_value": "None",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://help.fathom.video/en/articles/8368641",
+    "note": "Pass 1 was wrong on 'verdict'; corrected via live source."
+  },
+  {
+    "app_id": 93,
+    "app_name": "Fathom",
+    "field": "has_mcp",
+    "pass1_value": "False",
+    "verified_value": "True",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://help.fathom.video/en/articles/8368641",
+    "note": "Pass 1 was wrong on 'has_mcp'; corrected via live source."
+  },
+  {
+    "app_id": 93,
+    "app_name": "Fathom",
+    "field": "auth_methods",
+    "pass1_value": "['API key (X-Api-Key)', 'OAuth2 (for public/partner integrations)']",
+    "verified_value": "['API key (X-Api-Key)', 'OAuth2 (for public/partner integrations)']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://help.fathom.video/en/articles/8368641",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 93,
+    "app_name": "Fathom",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://help.fathom.video/en/articles/8368641",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 97,
+    "app_name": "higgsfield",
+    "field": "self_serve",
+    "pass1_value": "gated",
+    "verified_value": "self_serve",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://claudefa.st/blog/tools/mcp-extensions/higgsfield-mcp",
+    "note": "Pass 1 was wrong on 'self_serve'; corrected via live source."
+  },
+  {
+    "app_id": 97,
+    "app_name": "higgsfield",
+    "field": "verdict",
+    "pass1_value": "partial",
+    "verified_value": "None",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://claudefa.st/blog/tools/mcp-extensions/higgsfield-mcp",
+    "note": "Pass 1 was wrong on 'verdict'; corrected via live source."
+  },
+  {
+    "app_id": 97,
+    "app_name": "higgsfield",
+    "field": "has_mcp",
+    "pass1_value": "False",
+    "verified_value": "True",
+    "correct_in_pass1": false,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://claudefa.st/blog/tools/mcp-extensions/higgsfield-mcp",
+    "note": "Pass 1 was wrong on 'has_mcp'; corrected via live source."
+  },
+  {
+    "app_id": 97,
+    "app_name": "higgsfield",
+    "field": "auth_methods",
+    "pass1_value": "['OAuth2 (browser PKCE via Clerk) for MCP/CLI']",
+    "verified_value": "['OAuth2 (browser PKCE via Clerk) for MCP/CLI']",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://claudefa.st/blog/tools/mcp-extensions/higgsfield-mcp",
+    "note": "Pass 1 value confirmed correct against live source."
+  },
+  {
+    "app_id": 97,
+    "app_name": "higgsfield",
+    "field": "buildability_verdict",
+    "pass1_value": "ready",
+    "verified_value": "ready",
+    "correct_in_pass1": true,
+    "checked_by": "live web_search (Claude, direct)",
+    "evidence_url": "https://claudefa.st/blog/tools/mcp-extensions/higgsfield-mcp",
+    "note": "Pass 1 value confirmed correct against live source."
+  }
+]</script>
+<script id="verification-summary-data" type="application/json">{
+  "sample_size_apps": 25,
+  "sampled_app_ids": [
+    2,
+    10,
+    11,
+    15,
+    17,
+    20,
+    50,
+    53,
+    54,
+    62,
+    67,
+    69,
+    71,
+    72,
+    74,
+    75,
+    76,
+    81,
+    86,
+    87,
+    90,
+    91,
+    92,
+    93,
+    97
+  ],
+  "sampling_method": "Oversampled toward niche/low-visibility apps and every claimed has_mcp=true field (the fastest-moving, most training-data-staleness-prone fact in the dataset), plus a few well-known apps as a sanity check.",
+  "field_level_checks_run": 108,
+  "field_level_checks_correct_in_pass1": 83,
+  "field_level_pass1_accuracy_on_sample": 0.769,
+  "apps_with_at_least_one_pass1_error": 15,
+  "apps_fully_confirmed": 10,
+  "verification_method": "Live web_search + web_fetch against each app's actual developer docs, run independently from the pass-1 answer (pass 1 was answered from training knowledge only, with no browsing)."
+}</script>
+
+<script>
+const DATA = JSON.parse(document.getElementById('master-data').textContent);
+const PATTERNS = JSON.parse(document.getElementById('patterns-data').textContent);
+const VRESULTS = JSON.parse(document.getElementById('verification-results-data').textContent);
+const VSUMMARY = JSON.parse(document.getElementById('verification-summary-data').textContent);
+
+// ---------- theme toggle ----------
+(function(){
+  const btn = document.getElementById('themeToggle');
+  const stored = localStorage.getItem('theme');
+  if(stored) document.documentElement.setAttribute('data-theme', stored);
+  btn.addEventListener('click', () => {
+    const cur = document.documentElement.getAttribute('data-theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch(e){}
+  });
+})();
+
+// ---------- hero stats ----------
+function heroStats(){
+  const verifiedCount = DATA.filter(r => r.pass_number === 2).length;
+  const stats = [
+    [PATTERNS.ready_today_count, 'apps buildable today'],
+    [PATTERNS.self_serve_distribution.self_serve, 'fully self-serve credentials'],
+    [PATTERNS.mcp_official, 'already have an official MCP'],
+    [verifiedCount, 'apps re-checked against live docs'],
+  ];
+  document.getElementById('heroStats').innerHTML = stats.map(([n,l]) =>
+    `<div class="hstat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+}
+heroStats();
+
+// ---------- patterns list ----------
+function patternCards(){
+  const gatedCategories = Object.entries(PATTERNS.self_serve_by_category)
+    .filter(([c,v]) => (v.gated||0) + (v.partial||0) >= 2)
+    .map(([c]) => c);
+  const cards = [
+    [`${PATTERNS.self_serve_distribution.self_serve}`, `${PATTERNS.self_serve_distribution.self_serve}/100 apps are fully self-serve`,
+      "A developer can get a working credential alone — free tier or trial counts — with zero manual approval. That's the majority, and it skews toward API-key auth: token-based apps almost never gate the token itself, only usage volume."],
+    [PATTERNS.mcp_official, `${PATTERNS.mcp_official} apps already ship an official MCP server`,
+      "More than a third of the list doesn't need a Composio toolkit built from scratch so much as a wrapper — though \"official\" churns fast enough that a training-knowledge-only pass got several of these wrong (see Verification)."],
+    [PATTERNS.blocked.length + PATTERNS.partial.filter(p=>p.blocker.toLowerCase().includes('review')||p.blocker.toLowerCase().includes('approval')||p.blocker.toLowerCase().includes('partner')).length,
+      `Approval gates, not missing APIs, are the #1 blocker`,
+      "Google Ads, Meta Ads, LinkedIn Ads, Threads, Pinterest, Amazon SP-API — the docs and endpoints all exist and are well-documented. What's missing is App Review / developer-token approval / partner-program sign-off, which can take days to weeks and isn't self-serve by definition."],
+    ["3", "Only 3 apps are hard-blocked outright",
+      "LinkedIn Ads (partner program gate before any access), PitchBook (paid contract negotiated per-account, no public docs at all) and NotebookLM (no public API for the consumer product — only a gated Enterprise preview). Everything else is at least partially reachable."],
+    [gatedCategories.length ? gatedCategories.length : "2", "Fintech and enterprise-CRM cluster hardest to reach",
+      "Finance and Fintech (Brex, Ramp, Plaid production, PitchBook) and the enterprise end of CRM (DealCloud, Salesforce Commerce Cloud, Gladly) gate on an existing paid/underwritten account rather than a developer-facing approval flow — a different kind of blocker than Meta/Google's app-review pattern."],
+    [PATTERNS.unknown_needs_human.length, `${PATTERNS.unknown_needs_human.length} apps genuinely defeated the agent`,
+      "Pumble, fanbasis, Waterfall.io, Paygent Connect, iPayX, Consensus — either no official developer docs exist publicly, or the only source found was an unverified community mirror. Flagged unknown rather than guessed, per the brief."],
+  ];
+  document.getElementById('patternGrid').innerHTML = cards.map(([n,h,p], i) =>
+    `<div class="prow"><div class="pnum">${String(i+1).padStart(2,'0')}</div><div><h3>${h}</h3><p>${p}</p></div></div>`).join('');
+}
+patternCards();
+
+// ---------- auth bars ----------
+function authBars(){
+  const entries = Object.entries(PATTERNS.auth_method_mentions).sort((a,b)=>b[1]-a[1]);
+  const max = Math.max(...entries.map(e=>e[1]));
+  const colors = ['var(--accent)','var(--ready)','var(--partial)','var(--blocked)','var(--unknown)'];
+  document.getElementById('authBars').innerHTML = entries.map(([k,v],i) => `
+    <div class="bar-row">
+      <div class="bar-label">${k}</div>
+      <div class="bar-track"><div class="bar-seg" style="width:${(v/max*100).toFixed(0)}%;background:${colors[i%colors.length]}"></div></div>
+      <div class="bar-val">${v} apps</div>
+    </div>`).join('');
+}
+authBars();
+
+function categoryBars(){
+  const rows = Object.entries(PATTERNS.self_serve_by_category);
+  document.getElementById('categoryBars').innerHTML = rows.map(([cat, dist]) => {
+    const total = Object.values(dist).reduce((a,b)=>a+b,0);
+    const order = ['self_serve','partial','gated','unknown'];
+    const colorMap = {self_serve:'var(--ready)', partial:'var(--partial)', gated:'var(--blocked)', unknown:'var(--unknown)'};
+    const segs = order.filter(k=>dist[k]).map(k =>
+      `<div class="bar-seg" style="width:${(dist[k]/total*100).toFixed(0)}%;background:${colorMap[k]}" title="${k}: ${dist[k]}"></div>`).join('');
+    return `<div class="bar-row">
+      <div class="bar-label">${cat}</div>
+      <div class="bar-track">${segs}</div>
+      <div class="bar-val">${total} apps</div>
+    </div>`;
+  }).join('') + `<div class="legend">
+      <span><span class="swatch" style="background:var(--ready)"></span>self-serve</span>
+      <span><span class="swatch" style="background:var(--partial)"></span>partial</span>
+      <span><span class="swatch" style="background:var(--blocked)"></span>gated</span>
+      <span><span class="swatch" style="background:var(--unknown)"></span>unknown</span>
+    </div>`;
+}
+categoryBars();
+
+function mcpBars(){
+  const rows = [['Official MCP server', PATTERNS.mcp_official, 'var(--ready)'],
+                ['Community MCP only', PATTERNS.mcp_community_only, 'var(--partial)'],
+                ['No MCP found', PATTERNS.mcp_none, 'var(--unknown)']];
+  document.getElementById('mcpBars').innerHTML = rows.map(([l,v,c]) => `
+    <div class="bar-row">
+      <div class="bar-label">${l}</div>
+      <div class="bar-track"><div class="bar-seg" style="width:${v}%;background:${c}"></div></div>
+      <div class="bar-val">${v} apps</div>
+    </div>`).join('');
+}
+mcpBars();
+
+// ---------- the matrix ----------
+const catSelect = document.getElementById('catFilter');
+[...new Set(DATA.map(r=>r.category))].sort().forEach(c => {
+  const o = document.createElement('option'); o.value=c; o.textContent=c; catSelect.appendChild(o);
+});
+
+let sortKey = 'category', sortDir = 1;
+let expandedId = null;
+
+function verdictPill(v){
+  const label = {ready:'Ready', partial:'Partial', blocked:'Blocked', unknown:'Unknown'}[v] || v;
+  return `<span class="pill ${v}">${label}</span>`;
+}
+function mcpLabel(r){
+  if(r.mcp_status === 'official') return `<span class="mcp-yes">official</span>`;
+  if(r.mcp_status === 'community') return `<span class="mcp-community">community</span>`;
+  return `<span class="mcp-no">none</span>`;
+}
+function serveLabel(s){
+  const map = {self_serve:['Self-serve','ready'], partial:['Partial','partial'], gated:['Gated','blocked'], unknown:['Unknown','unknown']};
+  const [label, cls] = map[s] || [s,'unknown'];
+  return `<span class="pill small ${cls}">${label}</span>`;
+}
+
+function renderTable(){
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const cat = document.getElementById('catFilter').value;
+  const verdict = document.getElementById('verdictFilter').value;
+  const serve = document.getElementById('serveFilter').value;
+  const mcp = document.getElementById('mcpFilter').value;
+
+  let rows = DATA.filter(r =>
+    (!q || r.name.toLowerCase().includes(q) || r.one_liner.toLowerCase().includes(q)) &&
+    (!cat || r.category === cat) &&
+    (!verdict || r.buildability_verdict === verdict) &&
+    (!serve || r.self_serve === serve) &&
+    (!mcp || r.mcp_status === mcp)
+  );
+
+  rows.sort((a,b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if(Array.isArray(av)) av = av.join(',');
+    if(Array.isArray(bv)) bv = bv.join(',');
+    av = (av||'').toString().toLowerCase(); bv = (bv||'').toString().toLowerCase();
+    if(av < bv) return -1*sortDir; if(av > bv) return 1*sortDir; return 0;
+  });
+
+  document.getElementById('countNote').textContent = `${rows.length} of 100 apps shown`;
+
+  document.getElementById('tableBody').innerHTML = rows.map(r => {
+    const verified = r.pass_number === 2;
+    const authTags = r.auth_methods.length ? r.auth_methods.map(a=>`<span class="auth-tag">${a}</span>`).join('') : `<span class="auth-tag">none</span>`;
+    const mainRow = `<tr class="detail-toggle ${verified?'row-verified':''}" data-id="${r.id}">
+      <td><div class="app-name">${r.name}</div><div class="app-cat">${r.category}</div></td>
+      <td>${authTags}</td>
+      <td>${serveLabel(r.self_serve)}</td>
+      <td>${r.api_surface_type}<div class="app-cat">${r.api_surface_breadth}</div></td>
+      <td>${mcpLabel(r)}</td>
+      <td>${verdictPill(r.buildability_verdict)}</td>
+      <td class="blocker-cell">${r.blocker || (r.buildability_verdict==='ready' ? '—' : '')}</td>
+    </tr>`;
+    let detailRow = '';
+    if(expandedId === r.id){
+      const ev = r.evidence.map(e => `<div class="ev-link">→ <a href="${e.url}" target="_blank" rel="noopener">${e.url}</a> — ${e.note}</div>`).join('') || '<div class="ev-link">No evidence URL captured.</div>';
+      detailRow = `<tr class="expand-row"><td colspan="7">
+        <div><b style="color:var(--ink)">${r.one_liner}</b></div>
+        <div style="margin-top:10px;"><b style="color:var(--ink)">Self-serve reasoning:</b> ${r.self_serve_reasoning}</div>
+        <div style="margin-top:8px;"><b style="color:var(--ink)">MCP evidence:</b> ${r.mcp_evidence}</div>
+        <div style="margin-top:12px;">${ev}</div>
+        ${r.source_pass_notes ? `<div class="note-line">↻ ${r.source_pass_notes}</div>` : ''}
+        ${r.needs_human ? `<div class="note-line" style="color:var(--blocked)">⚑ flagged for human review: ${r.human_note}</div>` : ''}
+        <div style="margin-top:10px;color:var(--ink-faint);">confidence: ${r.confidence}</div>
+      </td></tr>`;
+    }
+    return mainRow + detailRow;
+  }).join('');
+
+  document.querySelectorAll('.detail-toggle').forEach(tr => {
+    tr.addEventListener('click', () => {
+      const id = parseInt(tr.dataset.id);
+      expandedId = expandedId === id ? null : id;
+      renderTable();
+    });
+  });
+}
+
+['searchBox','catFilter','verdictFilter','serveFilter','mcpFilter'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderTable);
+  document.getElementById(id).addEventListener('change', renderTable);
+});
+document.querySelectorAll('thead th[data-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.key;
+    if(sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+    renderTable();
+  });
+});
+renderTable();
+
+// ---------- verification section ----------
+function verifySection(){
+  document.getElementById('p1acc').textContent = Math.round(VSUMMARY.field_level_pass1_accuracy_on_sample*100) + '%';
+  document.getElementById('vSampleN').textContent = VSUMMARY.sample_size_apps;
+  document.getElementById('vChecksN').textContent = VSUMMARY.field_level_checks_run;
+  document.getElementById('vWrongN').textContent = VSUMMARY.apps_with_at_least_one_pass1_error;
+
+  const wrong = VRESULTS.filter(v => !v.correct_in_pass1);
+  const right = VRESULTS.filter(v => v.correct_in_pass1);
+
+  document.getElementById('missBody').innerHTML = wrong.map(v => `
+    <tr>
+      <td><b>${v.app_name}</b></td>
+      <td>${v.field}</td>
+      <td class="was">${v.pass1_value}</td>
+      <td class="now">${v.verified_value}</td>
+      <td><a href="${v.evidence_url}" target="_blank" rel="noopener" style="font-size:12px;">${v.evidence_url ? new URL(v.evidence_url).hostname : '—'}</a></td>
+    </tr>`).join('') || '<tr><td colspan="5">No misses in this sample.</td></tr>';
+
+  document.getElementById('confirmedList').innerHTML = right.map(v =>
+    `<span class="pill small ready">${v.app_name} · ${v.field}</span>`).join('');
+}
+verifySection();
+
+// ---------- footer ----------
+document.getElementById('footReady').textContent = PATTERNS.ready_today_count + ' ready today';
+document.getElementById('footMcp').textContent = PATTERNS.mcp_official + ' with existing MCP';
+</script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+{
+  "n_apps": 100,
+  "auth_method_mentions": {
+    "OAuth2": 50,
+    "API key": 20,
+    "API token": 11,
+    "Personal access token": 6,
+    "Bot token": 3,
+    "Basic auth": 2,
+    "API key (Connected App client creds)": 1,
+    "Private App token": 1,
+    "GraphQL token": 1,
+    "OAuth2 (client_id/client_secret)": 1,
+    "Bearer API token (REST)": 1,
+    "OAuth2 (MCP only)": 1,
+    "Bearer API key (GraphQL)": 1,
+    "Basic auth (API key)": 1,
+    "HTTP Basic auth (agent email + API token)": 1,
+    "Basic auth (Account SID + Auth Token)": 1,
+    "App credentials (app_id/app_secret)": 1,
+    "API key (limited)": 1,
+    "OAuth2 (Meta)": 1,
+    "System user access tokens": 1,
+    "Basic auth (API id/token)": 1,
+    "API key/secret": 1,
+    "JWT (for some APIs)": 1,
+    "API key (legacy v1)": 1,
+    "Private API key": 1,
+    "Admin API access token": 1,
+    "Consumer key/secret (Basic-style)": 1,
+    "Bearer token": 1,
+    "Basic auth (admin token)": 1,
+    "Access token": 1,
+    "OAuth2 (LWA)": 1,
+    "AWS SigV4 (legacy)": 1,
+    "Basic auth (login/password as key)": 1,
+    "API key (token)": 1,
+    "API key (webhooks-oriented)": 1,
+    "GitHub App tokens": 1,
+    "Global API key (legacy)": 1,
+    "API key (anon/service role)": 1,
+    "OAuth2 (management API)": 1,
+    "API key / Bolt driver credentials": 1,
+    "Key-pair auth": 1,
+    "API key (public/private, digest auth)": 1,
+    "API key + Application key": 1,
+    "Bearer API token": 1,
+    "Internal integration token": 1,
+    "API token + Basic auth": 1,
+    "Personal API token": 1,
+    "API access token": 1,
+    "API key (secret/publishable)": 1,
+    "OAuth2 (Connect)": 1,
+    "API key (client_id/secret)": 1,
+    "API key/secret (HMAC)": 1,
+    "API key (per NMI Gateway API conventions)": 1,
+    "Static API key (PB-Token header)": 1,
+    "none for consumer product (no public API)": 1,
+    "OAuth2 for Enterprise (preview)": 1,
+    "OAuth2 access token": 1,
+    "API key (X-Api-Key)": 1,
+    "OAuth2 (for public/partner integrations)": 1,
+    "OAuth2 (per assignment hint)": 1,
+    "OAuth2 (browser PKCE via Clerk) for MCP/CLI": 1
+  },
+  "self_serve_distribution": {
+    "self_serve": 70,
+    "partial": 9,
+    "gated": 15,
+    "unknown": 6
+  },
+  "buildability_distribution": {
+    "ready": 70,
+    "partial": 21,
+    "unknown": 6,
+    "blocked": 3
+  },
+  "self_serve_by_category": {
+    "CRM and Sales": {
+      "self_serve": 8,
+      "partial": 1,
+      "gated": 1
+    },
+    "Support and Helpdesk": {
+      "self_serve": 9,
+      "gated": 1
+    },
+    "Communications and Messaging": {
+      "self_serve": 8,
+      "unknown": 1,
+      "gated": 1
+    },
+    "Marketing, Ads, Email and Social": {
+      "gated": 3,
+      "self_serve": 5,
+      "partial": 2
+    },
+    "Ecommerce": {
+      "self_serve": 5,
+      "gated": 2,
+      "partial": 2,
+      "unknown": 1
+    },
+    "Data, SEO and Scraping": {
+      "self_serve": 6,
+      "partial": 2,
+      "gated": 1,
+      "unknown": 1
+    },
+    "Developer, Infra and Data platforms": {
+      "self_serve": 9,
+      "partial": 1
+    },
+    "Productivity and Project Management": {
+      "self_serve": 10
+    },
+    "Finance and Fintech": {
+      "self_serve": 4,
+      "partial": 1,
+      "unknown": 2,
+      "gated": 3
+    },
+    "AI, Research and Media-native": {
+      "gated": 3,
+      "self_serve": 6,
+      "unknown": 1
+    }
+  },
+  "buildability_by_category": {
+    "CRM and Sales": {
+      "ready": 8,
+      "partial": 2
+    },
+    "Support and Helpdesk": {
+      "ready": 9,
+      "partial": 1
+    },
+    "Communications and Messaging": {
+      "ready": 8,
+      "unknown": 1,
+      "partial": 1
+    },
+    "Marketing, Ads, Email and Social": {
+      "partial": 4,
+      "blocked": 1,
+      "ready": 5
+    },
+    "Ecommerce": {
+      "ready": 5,
+      "partial": 4,
+      "unknown": 1
+    },
+    "Data, SEO and Scraping": {
+      "ready": 5,
+      "partial": 4,
+      "unknown": 1
+    },
+    "Developer, Infra and Data platforms": {
+      "ready": 10
+    },
+    "Productivity and Project Management": {
+      "ready": 10
+    },
+    "Finance and Fintech": {
+      "ready": 4,
+      "partial": 3,
+      "unknown": 2,
+      "blocked": 1
+    },
+    "AI, Research and Media-native": {
+      "blocked": 1,
+      "partial": 2,
+      "ready": 6,
+      "unknown": 1
+    }
+  },
+  "mcp_official": 38,
+  "mcp_community_only": 15,
+  "mcp_none": 47,
+  "top_blockers": [
+    [
+      "Product is legacy/maintenance-mode; docs and support are thin.",
+      1
+    ],
+    [
+      "Enterprise-only tenant + admin provisioning; not obtainable without an existing DealCloud contract.",
+      1
+    ],
+    [
+      "No self-serve account creation; requires an active enterprise contract.",
+      1
+    ],
+    [
+      "No clear public REST API docs found; primarily integrates via incoming webhooks.",
+      1
+    ],
+    [
+      "Meta Business verification + phone number registration required before sending is unlocked.",
+      1
+    ],
+    [
+      "Developer token approval gate for anything beyond basic/test access.",
+      1
+    ],
+    [
+      "Meta App Review required for marketing permissions beyond development mode.",
+      1
+    ],
+    [
+      "Partner program application + approval required before any API access.",
+      1
+    ]
+  ]
+}
